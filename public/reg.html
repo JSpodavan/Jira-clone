@@ -83,7 +83,17 @@
       .actions {
         margin-top: 8px;
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
+      }
+
+      .secondary-button {
+        background: transparent;
+        color: #0a4bcc;
+        box-shadow: none;
+      }
+
+      .secondary-button:hover {
+        box-shadow: none;
       }
 
       button {
@@ -126,6 +136,7 @@
           />
         </div>
         <div class="actions">
+          <button type="button" class="secondary-button">Регистрация</button>
           <button type="submit">Войти</button>
         </div>
       </form>
