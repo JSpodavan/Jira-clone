@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jira-clone — Проект</title>
+    <link rel="stylesheet" href="project.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="logo">Jira-clone</div>
+        <button class="nav-button" id="back-button">Back</button>
+        <div class="page-title" id="project-title">Проект</div>
+      </div>
+      <div class="topbar-right">
+        <div class="avatar">VK</div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="project-info">
+        <div class="info-text">
+          <div class="project-id-row">
+            <span class="project-id-label">ID проекта:</span>
+            <span class="project-id-value" id="project-id">—</span>
+            <button class="ghost small-button" id="copy-project-id">
+              Скопировать
+            </button>
+          </div>
+          <h1 id="project-name">Проект</h1>
+          <p id="project-description">Описание проекта</p>
+        </div>
+        <div class="info-actions">
+          <button class="secondary" id="edit-project-button">Редактировать</button>
+          <button class="danger" id="delete-project-button">Удалить</button>
+        </div>
+      </section>
+
+      <section class="members-section">
+        <div class="section-header">
+          <h2>Участники</h2>
+        </div>
+        <div class="members-list" id="members-container"></div>
+        <div class="add-member">
+          <h3>Добавить участника</h3>
+          <form id="add-member-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="member-user-id">User ID</label>
+                <input
+                  id="member-user-id"
+                  name="userId"
+                  type="text"
+                  placeholder="UUID пользователя"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="member-role">Роль</label>
+                <select id="member-role" name="role">
+                  <option value="OWNER">OWNER</option>
+                  <option value="MANAGER">MANAGER</option>
+                  <option value="MEMBER" selected>MEMBER</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="primary">Добавить</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="requests-section">
+        <div class="section-header">
+          <h2>Заявки на присоединение</h2>
+        </div>
+        <div class="requests-list" id="requests-container"></div>
+      </section>
+    </main>
+
+    <div class="modal" id="edit-modal">
+      <div class="modal-card large">
+        <div class="modal-header">
+          <h3>Редактировать проект</h3>
+          <button class="icon-button" id="edit-modal-close" type="button">
+            ×
+          </button>
+        </div>
+        <form id="edit-project-form">
+          <div class="form-group">
+            <label for="edit-project-name">Название проекта</label>
+            <input
+              id="edit-project-name"
+              name="name"
+              type="text"
+              placeholder="Введите название"
+            />
+          </div>
+          <div class="form-group">
+            <label for="edit-project-description">Описание</label>
+            <textarea
+              id="edit-project-description"
+              name="description"
+              placeholder="Введите описание"
+              rows="4"
+            ></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="ghost" id="edit-cancel">Отмена</button>
+            <button type="submit" class="primary">Сохранить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="error-modal">
+      <div class="modal-card small">
+        <div class="modal-header">
+          <h3>Ошибка</h3>
+          <button class="icon-button" id="error-modal-close" type="button">
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <p id="error-message"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="primary" id="error-ok">Ок</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="project.js"></script>
+  </body>
+</html>

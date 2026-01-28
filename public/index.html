@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jira-clone — Home</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="logo">Jira-clone</div>
+        <button
+          class="nav-button"
+          onclick="window.location.href='/projects.html'"
+        >
+          Projects
+        </button>
+        <button class="nav-button">Teams</button>
+        <button class="nav-button">Plan</button>
+        <button class="nav-button">Create</button>
+      </div>
+      <div class="topbar-right">
+        <div class="search">
+          <input type="text" placeholder="Search issues, boards, projects" />
+        </div>
+        <button class="primary">Create</button>
+        <div class="avatar">VK</div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-title">Your work</div>
+          <a class="sidebar-link active" href="#">Recent</a>
+          <a class="sidebar-link" href="#">Boards</a>
+          <a class="sidebar-link" href="#">Filters</a>
+          <a class="sidebar-link" href="#">Dashboards</a>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">Project</div>
+          <a class="sidebar-link" href="#">Backlog</a>
+          <a class="sidebar-link" href="#">Active sprints</a>
+          <a class="sidebar-link" href="#">Reports</a>
+          <a class="sidebar-link" href="#">Releases</a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="welcome">
+          <div>
+            <h1>Welcome to Jira-clone</h1>
+            <p>
+              This is your project home. Manage tasks, track progress, and
+              collaborate with your team.
+            </p>
+          </div>
+          <button class="primary">Create issue</button>
+        </section>
+
+        <section class="cards">
+          <div class="card">
+            <h3>Quick links</h3>
+            <button class="ghost">View backlog</button>
+            <button class="ghost">Go to board</button>
+            <button class="ghost">Open reports</button>
+          </div>
+          <div class="card">
+            <h3>Recent projects</h3>
+            <div class="list">
+              <div class="list-item">
+                <div class="badge">JC</div>
+                <div>
+                  <div class="list-title">Jira-clone Core</div>
+                  <div class="list-subtitle">Software project</div>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="badge">UX</div>
+                <div>
+                  <div class="list-title">UX Redesign</div>
+                  <div class="list-subtitle">Design project</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Activity</h3>
+            <div class="list">
+              <div class="list-item">
+                <div class="status todo"></div>
+                <div>
+                  <div class="list-title">Create user stories</div>
+                  <div class="list-subtitle">To Do</div>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="status in-progress"></div>
+                <div>
+                  <div class="list-title">Implement auth flow</div>
+                  <div class="list-subtitle">In Progress</div>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="status done"></div>
+                <div>
+                  <div class="list-title">Setup database</div>
+                  <div class="list-subtitle">Done</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="board">
+          <div class="board-header">
+            <h2>Board preview</h2>
+            <div class="filters">
+              <button class="ghost">Assignee</button>
+              <button class="ghost">Status</button>
+              <button class="ghost">Priority</button>
+            </div>
+          </div>
+          <div class="columns">
+            <div class="column">
+              <div class="column-title">To Do</div>
+              <div class="issue">Design login screen</div>
+              <div class="issue">Add validation rules</div>
+            </div>
+            <div class="column">
+              <div class="column-title">In Progress</div>
+              <div class="issue">Auth API integration</div>
+              <div class="issue">Create modal component</div>
+            </div>
+            <div class="column">
+              <div class="column-title">Done</div>
+              <div class="issue">Setup entities</div>
+              <div class="issue">Configure Swagger</div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

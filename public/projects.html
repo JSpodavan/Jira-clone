@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jira-clone — Мои проекты</title>
+    <link rel="stylesheet" href="projects.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="logo">Jira-clone</div>
+        <button class="nav-button back-button" id="back-button">Back</button>
+        <div class="page-title">Мои проекты</div>
+      </div>
+      <div class="topbar-right">
+        <div class="search">
+          <input
+            type="text"
+            id="project-search"
+            placeholder="Поиск проектов"
+          />
+        </div>
+        <div class="avatar">VK</div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="welcome">
+        <div>
+          <h1>Мои проекты</h1>
+          <p>Создавайте проекты, приглашайте участников и следите за задачами.</p>
+        </div>
+        <div class="actions">
+          <button class="primary" id="create-project-button">
+            + Создать проект
+          </button>
+          <button class="secondary" id="join-project-button">
+            Присоединиться к проекту
+          </button>
+        </div>
+      </section>
+
+      <section class="projects-section">
+        <div class="section-header">
+          <h2>Список проектов</h2>
+        </div>
+        <div class="projects-list" id="projects-container">
+          <div class="empty-state">Пока нет проектов</div>
+        </div>
+      </section>
+    </main>
+
+    <div class="modal" id="create-modal">
+      <div class="modal-card large">
+        <div class="modal-header">
+          <h3>Создать новый проект</h3>
+          <button class="icon-button" id="create-modal-close" type="button">
+            ×
+          </button>
+        </div>
+        <form id="create-project-form">
+          <div class="form-group">
+            <label for="project-name">Название проекта</label>
+            <input
+              id="project-name"
+              name="name"
+              type="text"
+              placeholder="Введите название проекта"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="project-description">Описание</label>
+            <textarea
+              id="project-description"
+              name="description"
+              placeholder="Введите описание проекта"
+              rows="4"
+            ></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="ghost" id="create-cancel">
+              Отмена
+            </button>
+            <button type="submit" class="primary">Создать</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="error-modal">
+      <div class="modal-card small">
+        <div class="modal-header">
+          <h3>Ошибка</h3>
+          <button class="icon-button" id="error-modal-close" type="button">
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <p id="error-message"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="primary" id="error-ok">Ок</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="join-modal">
+      <div class="modal-card large">
+        <div class="modal-header">
+          <h3>Присоединиться к проекту</h3>
+          <button class="icon-button" id="join-modal-close" type="button">
+            ×
+          </button>
+        </div>
+        <form id="join-project-form">
+          <div class="form-group">
+            <label for="join-project-id">ID проекта</label>
+            <input
+              id="join-project-id"
+              name="projectId"
+              type="text"
+              placeholder="Введите ID проекта"
+              required
+            />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="ghost" id="join-cancel">
+              Отмена
+            </button>
+            <button type="submit" class="primary">Отправить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="result-modal">
+      <div class="modal-card small">
+        <div class="modal-header">
+          <h3>Результат</h3>
+          <button class="icon-button" id="result-modal-close" type="button">
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="result-status" id="result-status"></div>
+          <p class="result-message" id="result-message"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="primary" id="result-ok">Ок</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="projects.js"></script>
+  </body>
+</html>

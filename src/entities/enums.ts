@@ -1,8 +1,3 @@
-export enum UserRole {
-  Admin = 'ADMIN',
-  User = 'USER',
-}
-
 export enum ProjectRole {
   Owner = 'OWNER',
   Manager = 'MANAGER',

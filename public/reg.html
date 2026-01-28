@@ -60,6 +60,18 @@
         gap: 8px;
       }
 
+      .field + .field {
+        margin-top: 12px;
+      }
+
+      .register-only {
+        display: none;
+      }
+
+      .register-only.visible {
+        display: flex;
+      }
+
       label {
         font-size: 14px;
         font-weight: 600;
@@ -78,6 +90,39 @@
         outline: none;
         border-color: #4b7cfb;
         box-shadow: 0 0 0 3px rgba(75, 124, 251, 0.15);
+      }
+
+      .validation-list {
+        display: none;
+        flex-direction: column;
+        gap: 6px;
+        margin: 6px 0 0;
+        padding: 0;
+        list-style: none;
+        font-size: 12px;
+        color: #5d6b87;
+      }
+
+      .validation-list.visible {
+        display: flex;
+      }
+
+      .validation-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .validation-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #e05656;
+        flex-shrink: 0;
+      }
+
+      .validation-item.valid .validation-dot {
+        background: #2f9e44;
       }
 
       .actions {
@@ -112,19 +157,113 @@
         transform: translateY(-1px);
         box-shadow: 0 12px 24px rgba(10, 75, 204, 0.22);
       }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        z-index: 10;
+      }
+
+      .modal.visible {
+        display: flex;
+      }
+
+      .modal-card {
+        width: min(420px, 92vw);
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+      }
+
+      .modal-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #1f2a44;
+      }
+
+      .modal-status {
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #0a4bcc;
+      }
+
+      .modal-message {
+        margin: 0;
+        color: #5d6b87;
+      }
+
+      .modal-button {
+        border: none;
+        border-radius: 10px;
+        padding: 10px 18px;
+        font-size: 14px;
+        font-weight: 600;
+        background: #0a4bcc;
+        color: #ffffff;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
     <main class="card">
       <div class="brand">Jira-clone</div>
       <div>
-        <h1 class="title">Вход</h1>
-        <p class="subtitle">Введите логин и пароль, чтобы продолжить.</p>
+        <h1 class="title" id="form-title">Вход</h1>
+        <p class="subtitle" id="form-subtitle">
+          Введите логин и пароль, чтобы продолжить.
+        </p>
       </div>
       <form>
         <div class="field">
-          <label for="login">Логин</label>
-          <input id="login" name="login" type="text" placeholder="Введите логин" />
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" placeholder="Введите email" />
+          <ul class="validation-list" id="email-rules">
+            <li class="validation-item" id="email-rule-required">
+              <span class="validation-dot"></span>
+              Поле не может быть пустым
+            </li>
+            <li class="validation-item" id="email-rule-format">
+              <span class="validation-dot"></span>
+              Корректный формат email
+            </li>
+          </ul>
+        </div>
+        <div class="field register-only" id="name-field">
+          <label for="name">Имя</label>
+          <input id="name" name="name" type="text" placeholder="Введите имя" />
+          <ul class="validation-list" id="name-rules">
+            <li class="validation-item" id="name-rule-required">
+              <span class="validation-dot"></span>
+              Поле не может быть пустым
+            </li>
+          </ul>
+        </div>
+        <div class="field register-only" id="surname-field">
+          <label for="surname">Фамилия</label>
+          <input
+            id="surname"
+            name="surname"
+            type="text"
+            placeholder="Введите фамилию"
+          />
+          <ul class="validation-list" id="surname-rules">
+            <li class="validation-item" id="surname-rule-required">
+              <span class="validation-dot"></span>
+              Поле не может быть пустым
+            </li>
+          </ul>
         </div>
         <div class="field">
           <label for="password">Пароль</label>
@@ -134,12 +273,37 @@
             type="password"
             placeholder="Введите пароль"
           />
+          <ul class="validation-list" id="password-rules">
+            <li class="validation-item" id="password-rule-required">
+              <span class="validation-dot"></span>
+              Поле не может быть пустым
+            </li>
+            <li class="validation-item" id="password-rule-length">
+              <span class="validation-dot"></span>
+              5–30 символов
+            </li>
+            <li class="validation-item" id="password-rule-uppercase">
+              <span class="validation-dot"></span>
+              Есть заглавная буква (A–Z)
+            </li>
+          </ul>
         </div>
         <div class="actions">
-          <button type="button" class="secondary-button">Регистрация</button>
-          <button type="submit">Войти</button>
+          <button type="button" class="secondary-button" id="toggle-mode">
+            Регистрация
+          </button>
+          <button type="submit" id="submit-button">Войти</button>
         </div>
       </form>
     </main>
+    <div class="modal" id="result-modal" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <h2 class="modal-title">Результат</h2>
+        <div class="modal-status" id="modal-status"></div>
+        <p class="modal-message" id="modal-message"></p>
+        <button type="button" class="modal-button" id="modal-close">Ок</button>
+      </div>
+    </div>
+    <script src="reg.js"></script>
   </body>
 </html>
