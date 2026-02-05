@@ -28,7 +28,7 @@ export class ProjectsService {
     private readonly invitationRepository: Repository<ProjectInvitation>
   ) {}
 
-  private async getMemberRole(projectId: string, userId: string) {
+  async getMemberRole(projectId: string, userId: string) {
     const member = await this.membersRepository.findOne({
       where: { project: { id: projectId }, user: { id: userId } },
     });
@@ -52,7 +52,7 @@ export class ProjectsService {
     }
   }
 
-  private async ensureManagerOrOwner(projectId: string, userId: string) {
+  async ensureManagerOrOwner(projectId: string, userId: string) {
     const role = await this.getMemberRole(projectId, userId);
     if (role === null) {
       throw new ForbiddenException('Доступ запрещен');
@@ -61,7 +61,7 @@ export class ProjectsService {
       throw new ForbiddenException('Доступ запрещен');
     }
   }
-  private async ensureMember(projectId: string, userId: string) {
+  async ensureMember(projectId: string, userId: string) {
     const role = await this.getMemberRole(projectId, userId);
     if (role === null) {
       throw new ForbiddenException('Доступ запрещен');
@@ -101,6 +101,27 @@ export class ProjectsService {
       .leftJoinAndSelect('project.owner', 'owner')
       .leftJoinAndSelect('project.members', 'members')
       .getMany();
+  }
+
+  async findAllPublic(userId: string) {
+    const userProjects = await this.projectsRepository
+      .createQueryBuilder('project')
+      .innerJoin('project.members', 'member')
+      .where('member.userId = :userId', { userId })
+      .select('project.id')
+      .getMany();
+    
+    const userProjectIds = userProjects.map(p => p.id);
+    
+    const query = this.projectsRepository
+      .createQueryBuilder('project')
+      .select(['project.id', 'project.name', 'project.description']);
+    
+    if (userProjectIds.length > 0) {
+      query.where('project.id NOT IN (:...ids)', { ids: userProjectIds });
+    }
+    
+    return query.getMany();
   }
 
   async findOne(projectId: string, userId: string) {
@@ -179,6 +200,31 @@ export class ProjectsService {
     }
     await this.membersRepository.remove(member);
     return { message: 'Участник удален' };
+  }
+
+  async changeMemberRole(projectId: string, memberId: string, newRole: string, userId: string) {
+    const currentUserRole = await this.getMemberRole(projectId, userId);
+    
+    if (currentUserRole === ProjectRole.Manager && newRole !== ProjectRole.Member) {
+      throw new ForbiddenException('Manager can only change role to MEMBER');
+    }
+    
+    if (currentUserRole !== ProjectRole.Owner && currentUserRole !== ProjectRole.Manager) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    const member = await this.membersRepository.findOne({
+      where: { id: memberId, project: { id: projectId } },
+      relations: ['user'],
+    });
+    
+    if (!member) {
+      throw new NotFoundException('Member not found');
+    }
+
+    member.role = newRole as ProjectRole;
+    await this.membersRepository.save(member);
+    return { message: 'Role updated' };
   }
 
   async getMembers(projectId: string, userId: string) {

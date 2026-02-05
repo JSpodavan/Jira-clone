@@ -25,7 +25,7 @@
           <input type="text" placeholder="Search issues, boards, projects" />
         </div>
         <button class="primary">Create</button>
-        <div class="avatar">VK</div>
+        <div class="avatar" id="avatar" style="cursor: pointer;">VK</div>
       </div>
     </header>
 
@@ -142,5 +142,10 @@
         </section>
       </main>
     </div>
+    <script>
+      document.getElementById('avatar').addEventListener('click', () => {
+        window.location.href = '/profile.html';
+      });
+    </script>
   </body>
 </html>

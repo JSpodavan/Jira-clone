@@ -63,6 +63,12 @@ body {
   justify-content: center;
   font-weight: 700;
   color: #1f2a44;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
 }
 
 .content {
@@ -258,6 +264,86 @@ textarea:focus {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+}
+
+.tab-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  background: #f4f6fb;
+  padding: 4px;
+  border-radius: 10px;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: #5d6b87;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  background: #e9f0ff;
+  color: #0a4bcc;
+}
+
+.tab-button.active {
+  background: #ffffff;
+  color: #0a4bcc;
+  box-shadow: 0 2px 8px rgba(31, 42, 68, 0.08);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.projects-select-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 4px;
+  min-height: 200px;
+}
+
+.project-select-card {
+  background: #f7f9ff;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.project-select-card:hover {
+  background: #e9f0ff;
+  border-color: #c9d6f5;
+}
+
+.project-select-card.selected {
+  background: #e9f0ff;
+  border-color: #0a4bcc;
+  box-shadow: 0 2px 8px rgba(10, 75, 204, 0.15);
+}
+
+.project-select-title {
+  font-weight: 600;
+  color: #1f2a44;
+  margin-bottom: 4px;
+}
+
+.project-select-description {
+  font-size: 13px;
+  color: #6b778c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .result-status {

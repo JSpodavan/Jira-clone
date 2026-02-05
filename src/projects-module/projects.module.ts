@@ -11,5 +11,6 @@ import { ProjectInvitation } from '../entities/invitation.entity.js';
   imports: [TypeOrmModule.forFeature([Project, ProjectMember, User, ProjectInvitation])],
   controllers: [ProjectsController],
   providers: [ProjectsService],
+  exports: [ProjectsService]
 })
 export class ProjectsModule {}

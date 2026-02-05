@@ -1,9 +1,9 @@
-<!DOCTYPE html>
-<html lang="ru">
+﻿<!DOCTYPE html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Jira-clone — Проект</title>
+    <title>Jira-clone — Project</title>
     <link rel="stylesheet" href="project.css" />
   </head>
   <body>
@@ -11,7 +11,7 @@
       <div class="topbar-left">
         <div class="logo">Jira-clone</div>
         <button class="nav-button" id="back-button">Back</button>
-        <div class="page-title" id="project-title">Проект</div>
+        <div class="page-title" id="project-title">Project</div>
       </div>
       <div class="topbar-right">
         <div class="avatar">VK</div>
@@ -22,28 +22,51 @@
       <section class="project-info">
         <div class="info-text">
           <div class="project-id-row">
-            <span class="project-id-label">ID проекта:</span>
+            <span class="project-id-label">ID Projectа:</span>
             <span class="project-id-value" id="project-id">—</span>
             <button class="ghost small-button" id="copy-project-id">
-              Скопировать
+              Copy
             </button>
           </div>
-          <h1 id="project-name">Проект</h1>
-          <p id="project-description">Описание проекта</p>
+          <h1 id="project-name">Project</h1>
+          <p id="project-description">Description Projectа</p>
         </div>
         <div class="info-actions">
-          <button class="secondary" id="edit-project-button">Редактировать</button>
-          <button class="danger" id="delete-project-button">Удалить</button>
+          <button class="secondary" id="edit-project-button">Edit</button>
+          <button class="danger" id="delete-project-button">Delete</button>
         </div>
+      </section>
+
+      <section class="requests-section">
+        <div class="section-header">
+          <h2>Join Requests</h2>
+        </div>
+        <div class="requests-list" id="requests-container"></div>
+      </section>
+
+      <section class="tasks-section">
+        <div class="section-header">
+          <h2>Tasks</h2>
+          <button class="primary" id="create-task-button">Create Task</button>
+        </div>
+        <div class="tasks-list" id="tasks-container"></div>
       </section>
 
       <section class="members-section">
         <div class="section-header">
-          <h2>Участники</h2>
+          <h2>Members</h2>
+          <div class="members-info">
+            <span id="members-count">0 members</span>
+          </div>
         </div>
         <div class="members-list" id="members-container"></div>
+        <div class="pagination" id="members-pagination">
+          <button class="ghost" id="prev-page" disabled>Previous</button>
+          <span id="page-info">Page 1</span>
+          <button class="ghost" id="next-page">Next</button>
+        </div>
         <div class="add-member">
-          <h3>Добавить участника</h3>
+          <h3>Add Member</h3>
           <form id="add-member-form">
             <div class="form-row">
               <div class="form-group">
@@ -52,12 +75,12 @@
                   id="member-user-id"
                   name="userId"
                   type="text"
-                  placeholder="UUID пользователя"
+                  placeholder="User UUID"
                   required
                 />
               </div>
               <div class="form-group">
-                <label for="member-role">Роль</label>
+                <label for="member-role">Role</label>
                 <select id="member-role" name="role">
                   <option value="OWNER">OWNER</option>
                   <option value="MANAGER">MANAGER</option>
@@ -66,50 +89,43 @@
               </div>
             </div>
             <div class="form-actions">
-              <button type="submit" class="primary">Добавить</button>
+              <button type="submit" class="primary">Add</button>
             </div>
           </form>
         </div>
-      </section>
-
-      <section class="requests-section">
-        <div class="section-header">
-          <h2>Заявки на присоединение</h2>
-        </div>
-        <div class="requests-list" id="requests-container"></div>
       </section>
     </main>
 
     <div class="modal" id="edit-modal">
       <div class="modal-card large">
         <div class="modal-header">
-          <h3>Редактировать проект</h3>
+          <h3>Edit Project</h3>
           <button class="icon-button" id="edit-modal-close" type="button">
             ×
           </button>
         </div>
         <form id="edit-project-form">
           <div class="form-group">
-            <label for="edit-project-name">Название проекта</label>
+            <label for="edit-project-name">Title Projectа</label>
             <input
               id="edit-project-name"
               name="name"
               type="text"
-              placeholder="Введите название"
+              placeholder="Введите Title"
             />
           </div>
           <div class="form-group">
-            <label for="edit-project-description">Описание</label>
+            <label for="edit-project-description">Description</label>
             <textarea
               id="edit-project-description"
               name="description"
-              placeholder="Введите описание"
+              placeholder="Введите Description"
               rows="4"
             ></textarea>
           </div>
           <div class="modal-footer">
-            <button type="button" class="ghost" id="edit-cancel">Отмена</button>
-            <button type="submit" class="primary">Сохранить</button>
+            <button type="button" class="ghost" id="edit-cancel">Cancel</button>
+            <button type="submit" class="primary">Save</button>
           </div>
         </form>
       </div>
@@ -118,7 +134,7 @@
     <div class="modal" id="error-modal">
       <div class="modal-card small">
         <div class="modal-header">
-          <h3>Ошибка</h3>
+          <h3>Error</h3>
           <button class="icon-button" id="error-modal-close" type="button">
             ×
           </button>
@@ -127,11 +143,282 @@
           <p id="error-message"></p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="primary" id="error-ok">Ок</button>
+          <button type="button" class="primary" id="error-ok">Ok</button>
         </div>
+      </div>
+    </div>
+
+    <div class="modal" id="task-modal">
+      <div class="modal-card large">
+        <div class="modal-header">
+          <h3>Task Details</h3>
+          <button class="icon-button" id="task-modal-close" type="button">
+            ×
+          </button>
+        </div>
+        <div class="task-modal-content">
+          <h4 id="task-title"></h4>
+          <div class="form-group" id="task-description-view">
+            <label>Description</label>
+            <p id="task-description"></p>
+          </div>
+          <textarea id="task-description-edit" class="hidden" rows="4" placeholder="Description Tasks"></textarea>
+          
+          <div class="task-info-grid">
+            <div class="task-info-item">
+              <label>Status</label>
+              <span id="task-status-view"></span>
+              <select id="task-status-edit" class="hidden">
+                <option value="TODO">TODO</option>
+                <option value="IN_PROGRESS">IN_PROGRESS</option>
+                <option value="DONE">DONE</option>
+              </select>
+            </div>
+            <div class="task-info-item">
+              <label>Priority</label>
+              <span id="task-priority-view"></span>
+              <select id="task-priority-edit" class="hidden">
+                <option value="LOW">LOW</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+                <option value="CRITICAL">CRITICAL</option>
+              </select>
+            </div>
+            <div class="task-info-item">
+              <label>Assignee</label>
+              <span id="task-assignee-view"></span>
+              <input id="task-assignee-edit" type="text" placeholder="User UUID" class="hidden" />
+            </div>
+            <div class="task-info-item">
+              <label>Reporter</label>
+              <span id="task-reporter"></span>
+            </div>
+          </div>
+          
+          <div class="comments-section">
+            <h4>Comments</h4>
+            <div class="comments-list" id="comments-list"></div>
+            <form id="add-comment-form" class="add-comment-form">
+              <textarea id="comment-input" placeholder="Add a comment..." rows="2" required></textarea>
+              <button type="submit" class="primary">Add Comment</button>
+            </form>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="ghost" id="task-edit">Edit</button>
+          <button type="button" class="primary hidden" id="task-save">Save</button>
+          <button type="button" class="ghost hidden" id="task-cancel-edit">Cancel</button>
+          <button type="button" class="danger" id="task-delete">Delete</button>
+          <button type="button" class="ghost" id="task-close">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="create-task-modal">
+      <div class="modal-card large">
+        <div class="modal-header">
+          <h3>Create Task</h3>
+          <button class="icon-button" id="create-task-close" type="button">
+            ×
+          </button>
+        </div>
+        <form id="create-task-form">
+          <div class="form-group">
+            <label for="task-title-input">Title</label>
+            <input
+              id="task-title-input"
+              name="title"
+              type="text"
+              placeholder="Title Tasks"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="task-description-input">Description</label>
+            <textarea
+              id="task-description-input"
+              name="description"
+              placeholder="Description"
+              rows="4"
+            ></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="task-status-input">Status</label>
+              <select id="task-status-input" name="status">
+                <option value="TODO">TODO</option>
+                <option value="IN_PROGRESS">IN_PROGRESS</option>
+                <option value="DONE">DONE</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="task-priority-input">Priority</label>
+              <select id="task-priority-input" name="priority">
+                <option value="LOW">LOW</option>
+                <option value="MEDIUM" selected>MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+                <option value="CRITICAL">CRITICAL</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="task-assignee-input">Assignee</label>
+            <select
+              id="task-assignee-input"
+              name="assigneeId"
+              required
+            >
+              <option value="">Select assignee</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="ghost" id="create-task-cancel">
+              Cancel
+            </button>
+            <button type="submit" class="primary">Create</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="edit-task-modal">
+      <div class="modal-card large">
+        <div class="modal-header">
+          <h3>Edit задачу</h3>
+          <button class="icon-button" id="edit-task-close" type="button">
+            ×
+          </button>
+        </div>
+        <form id="edit-task-form">
+          <div class="form-group">
+            <label for="edit-task-description">Description</label>
+            <textarea
+              id="edit-task-description"
+              name="description"
+              placeholder="Description"
+              rows="4"
+            ></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-task-status">Status</label>
+              <select id="edit-task-status" name="status">
+                <option value="TODO">TODO</option>
+                <option value="IN_PROGRESS">IN_PROGRESS</option>
+                <option value="DONE">DONE</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit-task-priority">Priority</label>
+              <select id="edit-task-priority" name="priority">
+                <option value="LOW">LOW</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+                <option value="CRITICAL">CRITICAL</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="edit-task-assignee">Assignee ID</label>
+            <input
+              id="edit-task-assignee"
+              name="assigneeId"
+              type="text"
+              placeholder="User UUID или пусто"
+            />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="ghost" id="edit-task-cancel">
+              Cancel
+            </button>
+            <button type="submit" class="primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="edit-task-modal">
+      <div class="modal-card large">
+        <div class="modal-header">
+          <h3>Edit задачу</h3>
+          <button class="icon-button" id="edit-task-close" type="button">
+            ×
+          </button>
+        </div>
+        <form id="edit-task-form">
+          <div class="form-group">
+            <label for="edit-task-description">Description</label>
+            <textarea
+              id="edit-task-description"
+              name="description"
+              placeholder="Description"
+              rows="4"
+            ></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-task-status">Status</label>
+              <select id="edit-task-status" name="status">
+                <option value="TODO">TODO</option>
+                <option value="IN_PROGRESS">IN_PROGRESS</option>
+                <option value="DONE">DONE</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit-task-priority">Priority</label>
+              <select id="edit-task-priority" name="priority">
+                <option value="LOW">LOW</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+                <option value="CRITICAL">CRITICAL</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="edit-task-assignee">Assignee ID</label>
+            <input
+              id="edit-task-assignee"
+              name="assigneeId"
+              type="text"
+              placeholder="User UUID или пусто"
+            />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="ghost" id="edit-task-cancel">
+              Cancel
+            </button>
+            <button type="submit" class="primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="change-role-modal">
+      <div class="modal-card small">
+        <div class="modal-header">
+          <h3>Change Role</h3>
+          <button class="icon-button" id="change-role-close" type="button">×</button>
+        </div>
+        <form id="change-role-form">
+          <div class="form-group">
+            <label for="member-name-display">Member</label>
+            <p id="member-name-display"></p>
+          </div>
+          <div class="form-group">
+            <label for="new-role-select">New Role</label>
+            <select id="new-role-select" required>
+              <option value="">Select role</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="ghost" id="change-role-cancel">Cancel</button>
+            <button type="submit" class="primary">Change</button>
+          </div>
+        </form>
       </div>
     </div>
 
     <script src="project.js"></script>
   </body>
 </html>
+

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jira-clone — Profile</title>
+    <link rel="stylesheet" href="profile.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="logo">Jira-clone</div>
+        <button class="nav-button" id="back-button">Back</button>
+        <div class="page-title">Profile</div>
+      </div>
+      <div class="topbar-right">
+        <div class="avatar" id="avatar">VK</div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="profile-info">
+        <div class="profile-header">
+          <div class="profile-avatar-large" id="profile-avatar">VK</div>
+          <div class="profile-details">
+            <h1 id="profile-name">Loading...</h1>
+            <p id="profile-email"></p>
+            <div class="profile-id">
+              <span>ID:</span>
+              <span id="profile-id">—</span>
+              <button class="ghost small-button" id="copy-id">Copy</button>
+            </div>
+          </div>
+          <button class="danger" id="logout-button">Logout</button>
+        </div>
+      </section>
+
+      <section class="profile-section">
+        <div class="section-header">
+          <h2>My Projects</h2>
+        </div>
+        <div class="projects-grid" id="projects-container"></div>
+      </section>
+
+      <section class="profile-section">
+        <div class="section-header">
+          <h2>My Tasks</h2>
+        </div>
+        <div class="tasks-grid" id="tasks-container"></div>
+      </section>
+    </main>
+
+    <div class="modal" id="error-modal">
+      <div class="modal-card small">
+        <div class="modal-header">
+          <h3>Error</h3>
+          <button class="icon-button" id="error-modal-close" type="button">×</button>
+        </div>
+        <div class="modal-body">
+          <p id="error-message"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="primary" id="error-ok">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="profile.js"></script>
+  </body>
+</html>

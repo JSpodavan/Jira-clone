@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Jira-clone — Мои проекты</title>
+    <title>Jira-clone — My Projects</title>
     <link rel="stylesheet" href="projects.css" />
   </head>
   <body>
@@ -11,42 +11,42 @@
       <div class="topbar-left">
         <div class="logo">Jira-clone</div>
         <button class="nav-button back-button" id="back-button">Back</button>
-        <div class="page-title">Мои проекты</div>
+        <div class="page-title">My Projects</div>
       </div>
       <div class="topbar-right">
         <div class="search">
           <input
             type="text"
             id="project-search"
-            placeholder="Поиск проектов"
+            placeholder="Search projects"
           />
         </div>
-        <div class="avatar">VK</div>
+        <div class="avatar" id="avatar">VK</div>
       </div>
     </header>
 
     <main class="content">
       <section class="welcome">
         <div>
-          <h1>Мои проекты</h1>
-          <p>Создавайте проекты, приглашайте участников и следите за задачами.</p>
+          <h1>My Projects</h1>
+          <p>Create projects, invite members and track tasks.</p>
         </div>
         <div class="actions">
           <button class="primary" id="create-project-button">
-            + Создать проект
+            + Create Project
           </button>
           <button class="secondary" id="join-project-button">
-            Присоединиться к проекту
+            Join Project
           </button>
         </div>
       </section>
 
       <section class="projects-section">
         <div class="section-header">
-          <h2>Список проектов</h2>
+          <h2>Projects List</h2>
         </div>
         <div class="projects-list" id="projects-container">
-          <div class="empty-state">Пока нет проектов</div>
+          <div class="empty-state">No projects yet</div>
         </div>
       </section>
     </main>
@@ -54,36 +54,36 @@
     <div class="modal" id="create-modal">
       <div class="modal-card large">
         <div class="modal-header">
-          <h3>Создать новый проект</h3>
+          <h3>Create New Project</h3>
           <button class="icon-button" id="create-modal-close" type="button">
             ×
           </button>
         </div>
         <form id="create-project-form">
           <div class="form-group">
-            <label for="project-name">Название проекта</label>
+            <label for="project-name">Project Name</label>
             <input
               id="project-name"
               name="name"
               type="text"
-              placeholder="Введите название проекта"
+              placeholder="Enter project name"
               required
             />
           </div>
           <div class="form-group">
-            <label for="project-description">Описание</label>
+            <label for="project-description">Description</label>
             <textarea
               id="project-description"
               name="description"
-              placeholder="Введите описание проекта"
+              placeholder="Enter project description"
               rows="4"
             ></textarea>
           </div>
           <div class="modal-footer">
             <button type="button" class="ghost" id="create-cancel">
-              Отмена
+              Cancel
             </button>
-            <button type="submit" class="primary">Создать</button>
+            <button type="submit" class="primary">Create</button>
           </div>
         </form>
       </div>
@@ -92,7 +92,7 @@
     <div class="modal" id="error-modal">
       <div class="modal-card small">
         <div class="modal-header">
-          <h3>Ошибка</h3>
+          <h3>Error</h3>
           <button class="icon-button" id="error-modal-close" type="button">
             ×
           </button>
@@ -101,7 +101,7 @@
           <p id="error-message"></p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="primary" id="error-ok">Ок</button>
+          <button type="button" class="primary" id="error-ok">Ok</button>
         </div>
       </div>
     </div>
@@ -109,27 +109,44 @@
     <div class="modal" id="join-modal">
       <div class="modal-card large">
         <div class="modal-header">
-          <h3>Присоединиться к проекту</h3>
+          <h3>Join Project</h3>
           <button class="icon-button" id="join-modal-close" type="button">
             ×
           </button>
         </div>
         <form id="join-project-form">
           <div class="form-group">
-            <label for="join-project-id">ID проекта</label>
+            <label>Join Method</label>
+            <div class="tab-group">
+              <button type="button" class="tab-button active" data-method="id">By Project ID</button>
+              <button type="button" class="tab-button" data-method="list">From List</button>
+            </div>
+          </div>
+          <div class="form-group" id="join-by-id">
+            <label for="join-project-id">Project ID</label>
             <input
               id="join-project-id"
               name="projectId"
               type="text"
-              placeholder="Введите ID проекта"
-              required
+              placeholder="Enter project ID"
             />
+          </div>
+          <div class="form-group hidden" id="join-by-list">
+            <label>Select Project</label>
+            <div class="projects-select-list" id="projects-select-list">
+              <div class="empty-state">Loading...</div>
+            </div>
+            <div class="pagination" id="projects-pagination">
+              <button type="button" class="ghost" id="projects-prev-page" disabled>Previous</button>
+              <span id="projects-page-info">Page 1</span>
+              <button type="button" class="ghost" id="projects-next-page">Next</button>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="ghost" id="join-cancel">
-              Отмена
+              Cancel
             </button>
-            <button type="submit" class="primary">Отправить</button>
+            <button type="submit" class="primary">Send</button>
           </div>
         </form>
       </div>
@@ -138,7 +155,7 @@
     <div class="modal" id="result-modal">
       <div class="modal-card small">
         <div class="modal-header">
-          <h3>Результат</h3>
+          <h3>Result</h3>
           <button class="icon-button" id="result-modal-close" type="button">
             ×
           </button>
@@ -148,7 +165,7 @@
           <p class="result-message" id="result-message"></p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="primary" id="result-ok">Ок</button>
+          <button type="button" class="primary" id="result-ok">Ok</button>
         </div>
       </div>
     </div>

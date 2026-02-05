@@ -67,4 +67,12 @@ export class AuthModuleService {
       return { status: 'error', message: 'Ошибка входа' };
     }
   }
+
+  async getCurrentUser(userId: string) {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      select: ['id', 'email', 'name', 'surname'],
+    });
+    return user;
+  }
 }

@@ -40,14 +40,16 @@ const setMode = (mode) => {
     submitButton.textContent = 'Регистрация';
     nameField.classList.add('visible');
     surnameField.classList.add('visible');
-    emailRules.classList.add('visible');
-    nameRules.classList.add('visible');
-    surnameRules.classList.add('visible');
-    passwordRules.classList.add('visible');
-    updateEmailValidation();
-    updateNameValidation();
-    updateSurnameValidation();
-    updatePasswordValidation();
+    if (formSubmitted) {
+      emailRules.classList.add('visible');
+      nameRules.classList.add('visible');
+      surnameRules.classList.add('visible');
+      passwordRules.classList.add('visible');
+      updateEmailValidation();
+      updateNameValidation();
+      updateSurnameValidation();
+      updatePasswordValidation();
+    }
     return;
   }
 
@@ -64,9 +66,11 @@ const setMode = (mode) => {
 };
 
 let currentMode = 'login';
+let formSubmitted = false;
 
 toggleButton.addEventListener('click', () => {
   currentMode = currentMode === 'login' ? 'register' : 'login';
+  formSubmitted = false;
   clearFields();
   setMode(currentMode);
 });
@@ -78,7 +82,7 @@ const setRuleState = (element, isValid) => {
 const updateEmailValidation = () => {
   const emailValue = emailInput.value.trim();
   const isRegisterMode = currentMode === 'register';
-  const shouldShowRules = isRegisterMode || emailValue.length > 0;
+  const shouldShowRules = (isRegisterMode && formSubmitted) || emailValue.length > 0;
   emailRules.classList.toggle('visible', shouldShowRules);
   setRuleState(emailRuleRequired, emailValue.length > 0);
   setRuleState(
@@ -90,21 +94,21 @@ const updateEmailValidation = () => {
 const updateNameValidation = () => {
   const nameValue = nameInput.value.trim();
   const isRegisterMode = currentMode === 'register';
-  nameRules.classList.toggle('visible', isRegisterMode);
+  nameRules.classList.toggle('visible', isRegisterMode && formSubmitted);
   setRuleState(nameRuleRequired, nameValue.length > 0);
 };
 
 const updateSurnameValidation = () => {
   const surnameValue = surnameInput.value.trim();
   const isRegisterMode = currentMode === 'register';
-  surnameRules.classList.toggle('visible', isRegisterMode);
+  surnameRules.classList.toggle('visible', isRegisterMode && formSubmitted);
   setRuleState(surnameRuleRequired, surnameValue.length > 0);
 };
 
 const updatePasswordValidation = () => {
   const passwordValue = passwordInput.value;
   const isRegisterMode = currentMode === 'register';
-  const shouldShowRules = isRegisterMode || passwordValue.length > 0;
+  const shouldShowRules = (isRegisterMode && formSubmitted) || passwordValue.length > 0;
   passwordRules.classList.toggle('visible', shouldShowRules);
   passwordRuleLength.style.display = isRegisterMode ? '' : 'none';
   passwordRuleUppercase.style.display = isRegisterMode ? '' : 'none';
@@ -149,6 +153,7 @@ modalClose.addEventListener('click', () => {
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
+  formSubmitted = true;
 
   const emailValue = emailInput.value.trim();
   const passwordValue = passwordInput.value;
@@ -190,6 +195,8 @@ form.addEventListener('submit', async (event) => {
 
   if (!emailIsValid || !passwordIsValid) {
     showModal('error', 'Заполните обязательные поля', false);
+    updateNameValidation();
+    updateSurnameValidation();
     return;
   }
 

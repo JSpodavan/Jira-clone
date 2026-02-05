@@ -17,6 +17,11 @@ export class ProjectsController {
     return this.projectsService.findAll(userId)
   }
 
+  @Get('public/list')
+  async findAllPublicProjects(@CurrentUser() userId: string){
+    return this.projectsService.findAllPublic(userId)
+  }
+
   @Get(':id')
   async findById(@Param('id') projectId: string, @CurrentUser() userId: string){
     const project = await this.projectsService.findOne(projectId, userId)
@@ -49,6 +54,11 @@ export class ProjectsController {
   @Delete(':id/members/:memberId')
   async deleteMember(@Param('id') projectId: string, @Param('memberId') memberId: string, @CurrentUser() userId: string){
     return this.projectsService.removeMember(projectId, memberId, userId)
+  }
+
+  @Patch(':id/members/:memberId/role')
+  async changeMemberRole(@Param('id') projectId: string, @Param('memberId') memberId: string, @Body() dto: { role: string }, @CurrentUser() userId: string){
+    return this.projectsService.changeMemberRole(projectId, memberId, dto.role, userId)
   }
 
   @Post(':projectId/join')

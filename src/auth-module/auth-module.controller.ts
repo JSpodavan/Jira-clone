@@ -1,8 +1,9 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Post, Res, Get } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthModuleService } from './auth-module.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { CurrentUser } from './decorators/current-user.decorator';
 
 @Controller('auth')
 export class AuthModuleController {
@@ -40,5 +41,16 @@ export class AuthModuleController {
       });
     }
     return { status: result.status, message: result.message };
+  }
+
+  @Get('me')
+  async getCurrentUser(@CurrentUser() userId: string) {
+    return this.authModuleService.getCurrentUser(userId);
+  }
+
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('access_token');
+    return { status: 'ok', message: 'Logged out' };
   }
 }
