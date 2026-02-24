@@ -40,10 +40,22 @@ body {
 
 .nav-button {
   border: none;
-  background: transparent;
-  color: #384562;
+  background: #e9f0ff;
+  color: #0a4bcc;
   font-weight: 600;
   cursor: pointer;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.nav-button:hover {
+  background: #d0e0ff;
+  transform: translateX(-2px);
+}
+
+.nav-button:active {
+  transform: translateX(0);
 }
 
 .search input {
@@ -105,20 +117,37 @@ body {
 .ghost {
   border: none;
   border-radius: 10px;
-  padding: 10px 16px;
+  padding: 10px 18px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .primary {
-  background: #0a4bcc;
+  background: linear-gradient(135deg, #0a4bcc 0%, #0841a8 100%);
   color: #ffffff;
+  box-shadow: 0 2px 8px rgba(10, 75, 204, 0.3);
+}
+
+.primary:hover {
+  background: linear-gradient(135deg, #0d5ce6 0%, #0a4bcc 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(10, 75, 204, 0.4);
+}
+
+.primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(10, 75, 204, 0.3);
 }
 
 .secondary {
   background: #e9f0ff;
   color: #0a4bcc;
+}
+
+.secondary:hover {
+  background: #d0e0ff;
+  box-shadow: 0 4px 12px rgba(10, 75, 204, 0.2);
 }
 
 .ghost {
@@ -127,11 +156,14 @@ body {
   color: #2c3a57;
 }
 
-.primary:hover,
-.secondary:hover,
 .ghost:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 24px rgba(10, 75, 204, 0.15);
+  background: #e9f0ff;
+  border-color: #0a4bcc;
+  color: #0a4bcc;
+}
+
+.ghost:active {
+  background: #d0e0ff;
 }
 
 .projects-section {
@@ -179,6 +211,16 @@ body {
 .project-description {
   font-size: 13px;
   color: #6b778c;
+}
+
+.select-project-info {
+  color: #5d6b87;
+  margin: 0 0 12px;
+}
+
+#task-projects-list {
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .empty-state {
@@ -235,12 +277,43 @@ body {
   font-size: 20px;
   cursor: pointer;
   color: #5d6b87;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+  background: #e9f0ff;
+  color: #0a4bcc;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+select {
+  width: 100%;
+  border: 1px solid #d5dbe7;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+select:focus {
+  outline: none;
+  border-color: #4b7cfb;
+  box-shadow: 0 0 0 3px rgba(75, 124, 251, 0.15);
 }
 
 input,
@@ -313,12 +386,41 @@ textarea:focus {
 }
 
 .project-select-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   background: #f7f9ff;
   border: 2px solid transparent;
   border-radius: 10px;
   padding: 12px 14px;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.project-select-card:hover {
+  background: #e9f0ff;
+  border-color: #c9d6f5;
+  transform: translateX(4px);
+}
+
+.project-select-card.selected {
+  background: #e9f0ff;
+  border-color: #0a4bcc;
+  box-shadow: 0 2px 8px rgba(10, 75, 204, 0.15);
+}
+
+.project-badge-small {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .project-select-card:hover {

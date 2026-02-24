@@ -9,18 +9,12 @@
   <body>
     <header class="topbar">
       <div class="topbar-left">
-        <div class="logo">Jira-clone</div>
+        <a href="/index.html" class="logo">Jira-clone</a>
         <button class="nav-button back-button" id="back-button">Back</button>
         <div class="page-title">My Projects</div>
+        <button class="primary" id="create-task-button">+ Create</button>
       </div>
       <div class="topbar-right">
-        <div class="search">
-          <input
-            type="text"
-            id="project-search"
-            placeholder="Search projects"
-          />
-        </div>
         <div class="avatar" id="avatar">VK</div>
       </div>
     </header>
@@ -167,6 +161,88 @@
         <div class="modal-footer">
           <button type="button" class="primary" id="result-ok">Ok</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Select Project Modal for Task Creation -->
+    <div class="modal" id="select-project-modal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Select Project</h3>
+          <button class="icon-button" id="select-project-modal-close" type="button">
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="select-project-info">Select a project to create a task:</p>
+          <div class="projects-select-list" id="task-projects-list">
+            <div class="empty-state">Loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Task Modal -->
+    <div class="modal" id="create-task-modal">
+      <div class="modal-card large">
+        <div class="modal-header">
+          <h3>Create New Task</h3>
+          <button class="icon-button" id="create-task-modal-close" type="button">
+            ×
+          </button>
+        </div>
+        <form id="create-task-form">
+          <div class="form-group">
+            <label for="task-title">Title</label>
+            <input
+              id="task-title"
+              name="title"
+              type="text"
+              placeholder="Enter task title"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="task-description">Description</label>
+            <textarea
+              id="task-description"
+              name="description"
+              placeholder="Enter task description"
+              rows="3"
+            ></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="task-status">Status</label>
+              <select id="task-status" name="status">
+                <option value="TODO">TODO</option>
+                <option value="IN_PROGRESS">IN_PROGRESS</option>
+                <option value="DONE">DONE</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="task-priority">Priority</label>
+              <select id="task-priority" name="priority">
+                <option value="LOW">LOW</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+                <option value="CRITICAL">CRITICAL</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="task-assignee">Assignee</label>
+            <select id="task-assignee" name="assigneeId">
+              <option value="">Select assignee</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="ghost" id="create-task-cancel">
+              Cancel
+            </button>
+            <button type="submit" class="primary">Create</button>
+          </div>
+        </form>
       </div>
     </div>
 

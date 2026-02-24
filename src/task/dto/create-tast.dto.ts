@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsUUID, isUUID, Length, MaxLength } from "class-validator";
+import { IsDateString, IsNotEmpty, IsOptional, IsUUID, isUUID, Length, MaxLength, IsArray, IsString } from "class-validator";
 import { TaskPriority, TaskStatus } from "src/entities/enums";
 
 
@@ -21,4 +21,18 @@ export class createTaskDto{
 
     @IsOptional()
     priority?: TaskPriority;  
+
+    @IsOptional()
+    @IsDateString()
+    dueDate?: string;
+
+    @IsOptional()
+    @IsArray()
+    @IsUUID("4", { each: true })
+    parentTaskIds?: string[];
+
+    @IsOptional()
+    @IsArray()
+    @IsString({ each: true })
+    tags?: string[];
 }

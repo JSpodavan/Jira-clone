@@ -46,4 +46,13 @@ export class Task {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @Column({ name: 'due_date', type: 'timestamp', nullable: true })
+  dueDate: Date | null;
+
+  @Column({ name: 'parent_task_ids', type: 'simple-array', nullable: true })
+  parentTaskIds: string[] | null;
+
+  @Column({ name: 'tags', type: 'simple-array', nullable: true })
+  tags: string[] | null;
 }

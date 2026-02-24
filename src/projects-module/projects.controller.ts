@@ -17,6 +17,11 @@ export class ProjectsController {
     return this.projectsService.findAll(userId)
   }
 
+  @Get('my-managed')
+  async findMyManagedProjects(@CurrentUser() userId: string){
+    return this.projectsService.findMyManagedProjects(userId)
+  }
+
   @Get('public/list')
   async findAllPublicProjects(@CurrentUser() userId: string){
     return this.projectsService.findAllPublic(userId)

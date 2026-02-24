@@ -9,22 +9,16 @@
   <body>
     <header class="topbar">
       <div class="topbar-left">
-        <div class="logo">Jira-clone</div>
+        <a href="/index.html" class="logo" style="text-decoration: none;">Jira-clone</a>
         <button
           class="nav-button"
           onclick="window.location.href='/projects.html'"
         >
           Projects
         </button>
-        <button class="nav-button">Teams</button>
-        <button class="nav-button">Plan</button>
-        <button class="nav-button">Create</button>
+        <button class="primary" id="create-task-button">+ Create</button>
       </div>
       <div class="topbar-right">
-        <div class="search">
-          <input type="text" placeholder="Search issues, boards, projects" />
-        </div>
-        <button class="primary">Create</button>
         <div class="avatar" id="avatar" style="cursor: pointer;">VK</div>
       </div>
     </header>
@@ -32,18 +26,8 @@
     <div class="layout">
       <aside class="sidebar">
         <div class="sidebar-section">
-          <div class="sidebar-title">Your work</div>
-          <a class="sidebar-link active" href="#">Recent</a>
-          <a class="sidebar-link" href="#">Boards</a>
-          <a class="sidebar-link" href="#">Filters</a>
-          <a class="sidebar-link" href="#">Dashboards</a>
-        </div>
-        <div class="sidebar-section">
-          <div class="sidebar-title">Project</div>
-          <a class="sidebar-link" href="#">Backlog</a>
-          <a class="sidebar-link" href="#">Active sprints</a>
-          <a class="sidebar-link" href="#">Reports</a>
-          <a class="sidebar-link" href="#">Releases</a>
+          <div class="sidebar-title">YOUR PROJECTS</div>
+          <div id="user-projects-list"></div>
         </div>
       </aside>
 
@@ -56,95 +40,1135 @@
               collaborate with your team.
             </p>
           </div>
-          <button class="primary">Create issue</button>
-        </section>
-
-        <section class="cards">
-          <div class="card">
-            <h3>Quick links</h3>
-            <button class="ghost">View backlog</button>
-            <button class="ghost">Go to board</button>
-            <button class="ghost">Open reports</button>
-          </div>
-          <div class="card">
-            <h3>Recent projects</h3>
-            <div class="list">
-              <div class="list-item">
-                <div class="badge">JC</div>
-                <div>
-                  <div class="list-title">Jira-clone Core</div>
-                  <div class="list-subtitle">Software project</div>
-                </div>
-              </div>
-              <div class="list-item">
-                <div class="badge">UX</div>
-                <div>
-                  <div class="list-title">UX Redesign</div>
-                  <div class="list-subtitle">Design project</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <h3>Activity</h3>
-            <div class="list">
-              <div class="list-item">
-                <div class="status todo"></div>
-                <div>
-                  <div class="list-title">Create user stories</div>
-                  <div class="list-subtitle">To Do</div>
-                </div>
-              </div>
-              <div class="list-item">
-                <div class="status in-progress"></div>
-                <div>
-                  <div class="list-title">Implement auth flow</div>
-                  <div class="list-subtitle">In Progress</div>
-                </div>
-              </div>
-              <div class="list-item">
-                <div class="status done"></div>
-                <div>
-                  <div class="list-title">Setup database</div>
-                  <div class="list-subtitle">Done</div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <button class="primary" onclick="window.location.href='/projects.html'">Go to Projects</button>
         </section>
 
         <section class="board">
           <div class="board-header">
-            <h2>Board preview</h2>
-            <div class="filters">
-              <button class="ghost">Assignee</button>
-              <button class="ghost">Status</button>
-              <button class="ghost">Priority</button>
-            </div>
+            <h2>My Tasks</h2>
           </div>
           <div class="columns">
             <div class="column">
               <div class="column-title">To Do</div>
-              <div class="issue">Design login screen</div>
-              <div class="issue">Add validation rules</div>
+              <div class="issues-list" id="todo-tasks"></div>
             </div>
             <div class="column">
               <div class="column-title">In Progress</div>
-              <div class="issue">Auth API integration</div>
-              <div class="issue">Create modal component</div>
+              <div class="issues-list" id="inprogress-tasks"></div>
             </div>
             <div class="column">
               <div class="column-title">Done</div>
-              <div class="issue">Setup entities</div>
-              <div class="issue">Configure Swagger</div>
+              <div class="issues-list" id="done-tasks"></div>
             </div>
           </div>
         </section>
       </main>
     </div>
+    <!-- Project Modal -->
+    <div class="modal" id="project-modal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="project-modal-title">Project</h3>
+          <button class="icon-button" id="project-modal-close">×</button>
+        </div>
+        <div class="modal-body">
+          <p id="project-modal-description"></p>
+          <div class="project-info">
+            <div class="project-info-item">
+              <label>Owner:</label>
+              <span id="project-modal-owner">—</span>
+            </div>
+            <div class="project-info-item">
+              <label>Created:</label>
+              <span id="project-modal-created">—</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="primary" id="project-modal-open">Open Project</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal" id="task-modal">
+      <div class="modal-card large">
+        <div class="modal-header">
+          <h3 id="task-modal-title">Task</h3>
+          <button class="icon-button" id="task-modal-close">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="task-detail-row" id="task-tags-row">
+            <div class="task-tags-list" id="task-modal-tags"></div>
+          </div>
+          <div class="task-detail-row">
+            <span class="task-label">Status:</span>
+            <span class="task-value" id="task-modal-status">—</span>
+          </div>
+          <div class="task-detail-row">
+            <span class="task-label">Priority:</span>
+            <span class="task-value" id="task-modal-priority">—</span>
+          </div>
+          <div class="task-detail-row">
+            <span class="task-label">Project:</span>
+            <span class="task-value" id="task-modal-project">—</span>
+          </div>
+          <div class="task-detail-row">
+            <span class="task-label">Reporter:</span>
+            <span class="task-value" id="task-modal-reporter">—</span>
+          </div>
+          <div class="task-detail-row" id="task-parent-tasks-row">
+            <span class="task-label">Parent Tasks:</span>
+            <div class="task-parent-tasks-list" id="task-modal-parent-tasks"></div>
+          </div>
+          <div class="task-detail-row">
+            <span class="task-label">Description:</span>
+            <p id="task-modal-description">—</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="primary" id="task-modal-open-project">Go to Project</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Select Project Modal for Task Creation -->
+    <div class="modal" id="select-project-modal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Select Project</h3>
+          <button class="icon-button" id="select-project-modal-close">×</button>
+        </div>
+        <div class="modal-body">
+          <p class="select-project-info">Select a project to create a task:</p>
+          <div class="projects-select-list" id="task-projects-list">
+            <div class="empty-state">Loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Task Modal -->
+    <div class="modal" id="create-task-modal">
+      <div class="modal-card large">
+        <div class="modal-header">
+          <h3>Create Task</h3>
+          <button class="icon-button" id="create-task-modal-close" type="button">×</button>
+        </div>
+        <form id="create-task-form">
+          <div class="form-group">
+            <label for="task-title-input">
+              <span class="input-icon">📋</span> Title
+            </label>
+            <input
+              id="task-title-input"
+              name="title"
+              type="text"
+              placeholder="Enter task title"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="task-description-input">
+              <span class="input-icon">📝</span> Description
+            </label>
+            <textarea
+              id="task-description-input"
+              name="description"
+              placeholder="Add a more detailed description..."
+              rows="3"
+            ></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="task-status-input">
+                <span class="input-icon">📊</span> Status
+              </label>
+              <select id="task-status-input" name="status">
+                <option value="TODO">🔴 TODO</option>
+                <option value="IN_PROGRESS">🟡 In Progress</option>
+                <option value="DONE">🟢 Done</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="task-priority-input">
+                <span class="input-icon">⚡</span> Priority
+              </label>
+              <select id="task-priority-input" name="priority">
+                <option value="LOW">⬜ Low</option>
+                <option value="MEDIUM" selected>🔵 Medium</option>
+                <option value="HIGH">🟠 High</option>
+                <option value="CRITICAL">🔴 Critical</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="task-assignee-input">
+              <span class="input-icon">👤</span> Assignee
+            </label>
+            <select id="task-assignee-input" name="assigneeId" required>
+              <option value="">👤 Select team member</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="task-due-date-input">
+              <span class="input-icon">📅</span> Due Date
+            </label>
+            <div class="date-picker-wrapper">
+              <div class="date-picker-container">
+                <input
+                  type="text"
+                  id="task-due-date-input"
+                  name="dueDate"
+                  placeholder="Click to select due date"
+                  readonly
+                />
+                <button type="button" class="date-picker-toggle" id="due-date-toggle">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                </button>
+                <button type="button" class="clear-date hidden" id="clear-due-date">×</button>
+              </div>
+              <div class="calendar-dropdown hidden" id="calendar-dropdown">
+                <div class="calendar-header">
+                  <button type="button" class="calendar-nav" id="calendar-prev">‹</button>
+                  <span id="calendar-month-year"></span>
+                  <button type="button" class="calendar-nav" id="calendar-next">›</button>
+                </div>
+                <div class="calendar-weekdays">
+                  <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                </div>
+                <div class="calendar-days" id="calendar-days"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="task-parent-tasks-input">
+              <span class="input-icon">📌</span> Parent Tasks
+            </label>
+            <div class="parent-tasks-container" id="parent-tasks-container">
+              <div class="parent-tasks-list" id="parent-tasks-list"></div>
+              <button type="button" class="add-parent-task-btn" id="add-parent-task-btn">
+                <span>+</span> Add Parent Task
+              </button>
+            </div>
+            <div class="parent-task-select-modal hidden" id="parent-task-select-modal">
+              <div class="parent-task-select-content">
+                <div class="parent-task-select-header">
+                  <h4>Select Parent Task</h4>
+                  <button type="button" class="close-parent-task-select" id="close-parent-task-select">×</button>
+                </div>
+                <div class="parent-task-select-list" id="parent-task-select-list"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>
+              <span class="input-icon">🏷️</span> Tags
+            </label>
+            <div class="tags-container" id="tags-container">
+              <div class="tags-list" id="tags-list"></div>
+              <button type="button" class="add-tag-btn" id="add-tag-btn">
+                <span>+</span> Add Tag
+              </button>
+            </div>
+            <div class="tag-select-modal hidden" id="tag-select-modal">
+              <div class="tag-select-content">
+                <div class="tag-select-header">
+                  <h4>Select or Create Tag</h4>
+                  <button type="button" class="close-tag-select" id="close-tag-select">×</button>
+                </div>
+                <div class="tag-select-existing" id="tag-select-existing"></div>
+                <div class="tag-select-create">
+                  <input type="text" id="new-tag-input" placeholder="Create new tag..." />
+                  <button type="button" class="create-tag-btn" id="create-tag-btn">Create</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="ghost" id="create-task-cancel">
+              Cancel
+            </button>
+            <button type="submit" class="primary">Create</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Result Modal -->
+    <div class="modal" id="result-modal">
+      <div class="modal-card small">
+        <div class="modal-header">
+          <h3>Result</h3>
+          <button class="icon-button" id="result-modal-close">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="result-status" id="result-status"></div>
+          <p class="result-message" id="result-message"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="primary" id="result-ok">Ok</button>
+        </div>
+      </div>
+    </div>
+
     <script>
+      let selectedProjectId = null;
+      let currentUser = null;
+
+      const getCurrentUserId = async () => {
+        try {
+          const response = await fetch('/auth/me', { credentials: 'include' });
+          if (response.status === 401) {
+            window.location.href = '/login.html';
+            return null;
+          }
+          currentUser = await response.json();
+          
+          // Set avatar initials
+          const avatar = document.getElementById('avatar');
+          if (currentUser && avatar) {
+            const initials = (currentUser.name?.[0] || '') + (currentUser.surname?.[0] || '');
+            avatar.textContent = initials.toUpperCase() || 'U';
+          }
+          
+          return currentUser.id || currentUser.sub || null;
+        } catch (e) {
+          console.error('Error getting current user:', e);
+          return null;
+        }
+      };
+
+      const loadUserProjects = async () => {
+        const userId = await getCurrentUserId();
+        if (!userId) return;
+
+        try {
+          const response = await fetch('/api/projects', { credentials: 'include' });
+          if (!response.ok) {
+            throw new Error('Failed to load projects');
+          }
+          const projects = await response.json();
+          renderProjects(projects);
+        } catch (e) {
+          console.error('Error loading projects:', e);
+        }
+      };
+
+      const renderProjects = (projects) => {
+        const container = document.getElementById('user-projects-list');
+        container.innerHTML = '';
+        
+        if (!projects || projects.length === 0) {
+          container.innerHTML = '<div class="empty-state">No projects</div>';
+          return;
+        }
+
+        // Colors for project badges
+        const colors = [
+          'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+          'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+          'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+          'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+          'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+          'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+          'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+        ];
+
+        projects.forEach((project, index) => {
+          const link = document.createElement('a');
+          link.className = 'sidebar-link';
+          
+          // Create badge with project initials
+          const badge = document.createElement('span');
+          badge.className = 'project-badge';
+          const initials = (project.name || 'U').substring(0, 2).toUpperCase();
+          badge.textContent = initials;
+          badge.style.background = colors[index % colors.length];
+          
+          // Project name
+          const nameSpan = document.createElement('span');
+          nameSpan.textContent = project.name || 'Untitled';
+          
+          link.appendChild(badge);
+          link.appendChild(nameSpan);
+          
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            openProjectModal(project);
+          });
+          container.appendChild(link);
+        });
+      };
+
+      const openProjectModal = (project) => {
+        selectedProjectId = project.id;
+        document.getElementById('project-modal-title').textContent = project.name || 'Untitled';
+        document.getElementById('project-modal-description').textContent = project.description || 'No description';
+        
+        const owner = project.owner || {};
+        document.getElementById('project-modal-owner').textContent = 
+          owner.name && owner.surname ? `${owner.name} ${owner.surname}` : owner.email || '—';
+        
+        if (project.createdAt) {
+          const date = new Date(project.createdAt);
+          document.getElementById('project-modal-created').textContent = date.toLocaleDateString();
+        } else {
+          document.getElementById('project-modal-created').textContent = '—';
+        }
+
+        document.getElementById('project-modal').classList.add('visible');
+      };
+
+      const closeProjectModal = () => {
+        document.getElementById('project-modal').classList.remove('visible');
+        selectedProjectId = null;
+      };
+
+      document.getElementById('project-modal-close').addEventListener('click', closeProjectModal);
+      document.getElementById('project-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'project-modal') closeProjectModal();
+      });
+      document.getElementById('project-modal-open').addEventListener('click', () => {
+        if (selectedProjectId) {
+          window.location.href = `/project.html?id=${selectedProjectId}`;
+        }
+      });
+
+      const loadMyTasks = async () => {
+        const userId = await getCurrentUserId();
+        if (!userId) return;
+
+        try {
+          const response = await fetch('/api/task/my-tasks', { credentials: 'include' });
+          if (!response.ok) {
+            throw new Error('Failed to load tasks');
+          }
+          const tasks = await response.json();
+          
+          const todoTasks = tasks.filter(t => t.status === 'TODO');
+          const inProgressTasks = tasks.filter(t => t.status === 'IN_PROGRESS');
+          const doneTasks = tasks.filter(t => t.status === 'DONE');
+          
+          renderTasks('todo-tasks', todoTasks);
+          renderTasks('inprogress-tasks', inProgressTasks);
+          renderTasks('done-tasks', doneTasks);
+        } catch (e) {
+          console.error('Error loading tasks:', e);
+        }
+      };
+
+      const renderTasks = (containerId, tasks) => {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        
+        if (!tasks || tasks.length === 0) {
+          container.innerHTML = '<div class="empty-state">No tasks</div>';
+          return;
+        }
+
+        tasks.forEach(task => {
+          const issue = document.createElement('div');
+          issue.className = 'issue';
+          
+          const title = document.createElement('div');
+          title.className = 'issue-title';
+          title.textContent = task.title || 'Untitled';
+          
+          const meta = document.createElement('div');
+          meta.className = 'issue-meta';
+          meta.textContent = task.project?.name || '';
+          
+          issue.appendChild(title);
+          issue.appendChild(meta);
+          
+          issue.addEventListener('click', () => openTaskModal(task));
+          container.appendChild(issue);
+        });
+      };
+
+      let selectedTaskProjectId = null;
+      let currentTask = null;
+
+      const openTaskModal = async (task) => {
+        currentTask = task;
+        document.getElementById('task-modal-title').textContent = task.title || 'Untitled';
+        document.getElementById('task-modal-status').textContent = task.status || '—';
+        document.getElementById('task-modal-priority').textContent = task.priority || '—';
+        document.getElementById('task-modal-project').textContent = task.project?.name || '—';
+        
+        const reporter = task.reporter || {};
+        document.getElementById('task-modal-reporter').textContent = 
+          reporter.name && reporter.surname ? `${reporter.name} ${reporter.surname}` : reporter.email || '—';
+        
+        document.getElementById('task-modal-description').textContent = task.description || 'No description';
+        
+        selectedTaskProjectId = task.project?.id;
+        
+        // Clear previous tags and load new ones
+        const tagsContainer = document.getElementById('task-modal-tags');
+        const tagsRow = document.getElementById('task-tags-row');
+        tagsContainer.innerHTML = '';
+        
+        if (task.tags && task.tags.length > 0) {
+          tagsRow.style.display = 'flex';
+          tagsContainer.innerHTML = '';
+          task.tags.forEach(tag => {
+            const tagEl = document.createElement('div');
+            tagEl.className = 'task-tag';
+            
+            const tagName = document.createElement('span');
+            tagName.className = 'task-tag-name';
+            tagName.textContent = tag;
+            
+            tagEl.appendChild(tagName);
+            tagsContainer.appendChild(tagEl);
+          });
+        } else {
+          tagsRow.style.display = 'none';
+        }
+        
+        // Load parent tasks
+        const parentTasksContainer = document.getElementById('task-modal-parent-tasks');
+        const parentTasksRow = document.getElementById('task-parent-tasks-row');
+        
+        if (task.parentTaskIds && task.parentTaskIds.length > 0) {
+          parentTasksRow.style.display = 'flex';
+          parentTasksContainer.innerHTML = '<div class="empty-state">Loading...</div>';
+          
+          try {
+            // Fetch all parent tasks
+            const projectId = task.project?.id;
+            if (projectId) {
+              const response = await fetch(`/api/task/project/${projectId}`, { credentials: 'include' });
+              const allTasks = await response.json();
+              
+              const parentTasks = allTasks.filter(t => task.parentTaskIds.includes(t.id));
+              
+              parentTasksContainer.innerHTML = '';
+              parentTasks.forEach(parentTask => {
+                const tag = document.createElement('div');
+                tag.className = 'parent-task-tag clickable';
+                
+                const title = document.createElement('span');
+                title.className = 'parent-task-tag-title';
+                title.textContent = parentTask.title;
+                
+                const status = document.createElement('span');
+                status.className = 'parent-task-tag-status';
+                status.textContent = parentTask.status;
+                status.dataset.status = parentTask.status;
+                
+                tag.appendChild(title);
+                tag.appendChild(status);
+                
+                tag.addEventListener('click', () => {
+                  closeTaskModal();
+                  openTaskModal(parentTask);
+                });
+                
+                parentTasksContainer.appendChild(tag);
+              });
+            }
+          } catch (e) {
+            console.error('Error loading parent tasks:', e);
+            parentTasksContainer.innerHTML = '<div class="empty-state">Error loading</div>';
+          }
+        } else {
+          parentTasksRow.style.display = 'none';
+        }
+        
+        document.getElementById('task-modal').classList.add('visible');
+      };
+
+      const closeTaskModal = () => {
+        document.getElementById('task-modal').classList.remove('visible');
+        selectedTaskProjectId = null;
+      };
+
+      document.getElementById('task-modal-close').addEventListener('click', closeTaskModal);
+      document.getElementById('task-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'task-modal') closeTaskModal();
+      });
+      document.getElementById('task-modal-open-project').addEventListener('click', () => {
+        if (selectedTaskProjectId) {
+          window.location.href = `/project.html?id=${selectedTaskProjectId}`;
+        }
+      });
+
       document.getElementById('avatar').addEventListener('click', () => {
         window.location.href = '/profile.html';
+      });
+
+      loadUserProjects();
+      loadMyTasks();
+
+      // Create Task functionality
+      const createTaskButton = document.getElementById('create-task-button');
+      const selectProjectModal = document.getElementById('select-project-modal');
+      const selectProjectModalClose = document.getElementById('select-project-modal-close');
+      const taskProjectsList = document.getElementById('task-projects-list');
+      const createTaskModal = document.getElementById('create-task-modal');
+      const createTaskModalClose = document.getElementById('create-task-modal-close');
+      const createTaskCancel = document.getElementById('create-task-cancel');
+      const createTaskForm = document.getElementById('create-task-form');
+      const taskTitleInput = document.getElementById('task-title-input');
+      const taskDescriptionInput = document.getElementById('task-description-input');
+      const taskStatusInput = document.getElementById('task-status-input');
+      const taskPriorityInput = document.getElementById('task-priority-input');
+      const taskAssigneeInput = document.getElementById('task-assignee-input');
+      const taskDueDateInput = document.getElementById('task-due-date-input');
+      const dueDateToggle = document.getElementById('due-date-toggle');
+      const clearDueDateBtn = document.getElementById('clear-due-date');
+      
+      // Calendar state
+      let calendarDate = new Date();
+      let selectedDueDate = null;
+
+      // Parent tasks state
+      let selectedParentTasks = [];
+
+      // Tags state
+      let selectedTags = [];
+      let projectTags = [];
+
+      const toggleCalendar = () => {
+        const dropdown = document.getElementById('calendar-dropdown');
+        dropdown.classList.toggle('hidden');
+        
+        if (!dropdown.classList.contains('hidden')) {
+          // Check if there's enough space below or we need to open upward
+          const container = document.querySelector('#create-task-modal .date-picker-container');
+          const modal = document.getElementById('create-task-modal');
+          const containerRect = container.getBoundingClientRect();
+          const modalRect = modal.getBoundingClientRect();
+          const calendarHeight = 320; // approximate calendar height
+          
+          const spaceBelow = window.innerHeight - containerRect.bottom;
+          const spaceAbove = containerRect.top;
+          
+          // Determine if we should open upward (less than 100px below or more space above)
+          if (spaceBelow < calendarHeight && spaceAbove > spaceBelow) {
+            dropdown.classList.remove('open-down');
+            dropdown.classList.add('open-up');
+          } else {
+            dropdown.classList.remove('open-up');
+            dropdown.classList.add('open-down');
+          }
+          
+          renderCalendar();
+        }
+      };
+
+      const renderCalendar = () => {
+        const year = calendarDate.getFullYear();
+        const month = calendarDate.getMonth();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                            'July', 'August', 'September', 'October', 'November', 'December'];
+        
+        document.getElementById('calendar-month-year').textContent = `${monthNames[month]} ${year}`;
+        
+        const daysContainer = document.getElementById('calendar-days');
+        daysContainer.innerHTML = '';
+        
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        for (let i = 0; i < firstDay; i++) {
+          const emptyCell = document.createElement('div');
+          emptyCell.className = 'calendar-day empty';
+          daysContainer.appendChild(emptyCell);
+        }
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dayCell = document.createElement('div');
+          dayCell.className = 'calendar-day';
+          dayCell.textContent = day;
+          
+          const currentDate = new Date(year, month, day);
+          currentDate.setHours(0, 0, 0, 0);
+          
+          if (currentDate.getTime() === today.getTime()) {
+            dayCell.classList.add('today');
+          }
+          
+          if (currentDate < today) {
+            dayCell.classList.add('disabled');
+          } else {
+            dayCell.addEventListener('click', () => selectDate(year, month, day));
+          }
+          
+          if (selectedDueDate) {
+            const selected = new Date(selectedDueDate);
+            if (selected.getFullYear() === year && 
+                selected.getMonth() === month && 
+                selected.getDate() === day) {
+              dayCell.classList.add('selected');
+            }
+          }
+          
+          daysContainer.appendChild(dayCell);
+        }
+      };
+
+      const selectDate = (year, month, day) => {
+        selectedDueDate = new Date(year, month, day);
+        taskDueDateInput.value = formatDate(selectedDueDate);
+        document.getElementById('calendar-dropdown').classList.add('hidden');
+        clearDueDateBtn.classList.remove('hidden');
+      };
+
+      const clearDueDate = () => {
+        selectedDueDate = null;
+        taskDueDateInput.value = '';
+        clearDueDateBtn.classList.add('hidden');
+      };
+
+      document.getElementById('calendar-prev')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        calendarDate.setMonth(calendarDate.getMonth() - 1);
+        renderCalendar();
+      });
+
+      document.getElementById('calendar-next')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        calendarDate.setMonth(calendarDate.getMonth() + 1);
+        renderCalendar();
+      });
+
+      dueDateToggle?.addEventListener('click', toggleCalendar);
+      clearDueDateBtn?.addEventListener('click', clearDueDate);
+
+      document.addEventListener('click', (e) => {
+        const container = document.querySelector('#create-task-modal .date-picker-container');
+        const dropdown = document.getElementById('calendar-dropdown');
+        if (container && !container.contains(e.target) && !dropdown.contains(e.target) && !dropdown.classList.contains('hidden')) {
+          dropdown.classList.add('hidden');
+        }
+      });
+
+      // Recalculate calendar position on scroll/resize
+      window.addEventListener('resize', () => {
+        const dropdown = document.getElementById('calendar-dropdown');
+        if (!dropdown.classList.contains('hidden')) {
+          toggleCalendar();
+          toggleCalendar(); // toggle twice to reapply position
+        }
+      });
+
+      let createTaskProjectId = null;
+
+      const openSelectProjectModal = async () => {
+        selectProjectModal.classList.add('visible');
+        taskProjectsList.innerHTML = '<div class="empty-state">Loading...</div>';
+        
+        try {
+          const response = await fetch('/api/projects/my-managed', { credentials: 'include' });
+          if (response.status === 401) {
+            window.location.href = '/login.html';
+            return;
+          }
+          const projects = await response.json();
+          
+          if (!projects || projects.length === 0) {
+            taskProjectsList.innerHTML = '<div class="empty-state">You have no projects where you are Manager or Owner</div>';
+            return;
+          }
+          
+          const colors = [
+            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+          ];
+
+          taskProjectsList.innerHTML = '';
+          projects.forEach((project, index) => {
+            const card = document.createElement('div');
+            card.className = 'project-select-card';
+            
+            const badge = document.createElement('div');
+            badge.className = 'project-badge-small';
+            const initials = (project.name || 'U').substring(0, 2).toUpperCase();
+            badge.textContent = initials;
+            badge.style.background = colors[index % colors.length];
+            
+            const title = document.createElement('div');
+            title.className = 'project-select-title';
+            title.textContent = project.name;
+            
+            const description = document.createElement('div');
+            description.className = 'project-select-description';
+            description.textContent = project.description || 'No description';
+            
+            card.appendChild(badge);
+            card.appendChild(title);
+            card.appendChild(description);
+            
+            card.addEventListener('click', () => {
+              setTimeout(() => {
+                closeSelectProjectModal();
+                openCreateTaskModal(project);
+              }, 200);
+            });
+            
+            taskProjectsList.appendChild(card);
+          });
+        } catch (error) {
+          console.error('Error loading projects:', error);
+          taskProjectsList.innerHTML = '<div class="empty-state">Error loading projects</div>';
+        }
+      };
+
+      const closeSelectProjectModal = () => {
+        selectProjectModal.classList.remove('visible');
+      };
+
+      const openCreateTaskModal = async (project) => {
+        createTaskProjectId = project.id;
+        taskTitleInput.value = '';
+        taskDescriptionInput.value = '';
+        taskStatusInput.value = 'TODO';
+        taskPriorityInput.value = 'MEDIUM';
+        
+        // Reset due date and calendar position
+        selectedDueDate = null;
+        taskDueDateInput.value = '';
+        clearDueDateBtn.classList.add('hidden');
+        const dropdown = document.getElementById('calendar-dropdown');
+        dropdown.classList.remove('open-up');
+        dropdown.classList.add('open-down');
+        
+        // Reset parent tasks
+        selectedParentTasks = [];
+        renderSelectedParentTasks();
+        
+        // Reset tags
+        selectedTags = [];
+        renderSelectedTags();
+        
+        taskAssigneeInput.innerHTML = '<option value="">Select assignee</option>';
+        try {
+          const response = await fetch(`/api/projects/${project.id}/members`, { credentials: 'include' });
+          if (response.ok) {
+            const members = await response.json();
+            members.forEach(member => {
+              const user = member.user || {};
+              const displayName = user.name && user.surname 
+                ? `${user.name} ${user.surname}` 
+                : user.email || 'User';
+              const option = document.createElement('option');
+              option.value = user.id;
+              option.textContent = displayName;
+              taskAssigneeInput.appendChild(option);
+            });
+          }
+        } catch (e) {
+          console.error('Error loading members:', e);
+        }
+        
+        createTaskModal.classList.add('visible');
+      };
+
+      const closeCreateTaskModal = () => {
+        createTaskModal.classList.remove('visible');
+        createTaskProjectId = null;
+        selectedParentTasks = [];
+        renderSelectedParentTasks();
+        selectedTags = [];
+        renderSelectedTags();
+      };
+
+      // Parent task selection functions
+      const renderSelectedParentTasks = () => {
+        const list = document.getElementById('parent-tasks-list');
+        list.innerHTML = '';
+        
+        selectedParentTasks.forEach(task => {
+          const tag = document.createElement('div');
+          tag.className = 'parent-task-tag';
+          
+          const title = document.createElement('span');
+          title.className = 'parent-task-tag-title';
+          title.textContent = task.title;
+          
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'parent-task-tag-remove';
+          removeBtn.textContent = '×';
+          removeBtn.type = 'button';
+          removeBtn.addEventListener('click', () => {
+            selectedParentTasks = selectedParentTasks.filter(t => t.id !== task.id);
+            renderSelectedParentTasks();
+          });
+          
+          tag.appendChild(title);
+          tag.appendChild(removeBtn);
+          list.appendChild(tag);
+        });
+        
+        // Always show the add button
+        const addBtn = document.getElementById('add-parent-task-btn');
+        if (addBtn) {
+          addBtn.style.display = 'inline-flex';
+        }
+      };
+
+      const openParentTaskSelect = async () => {
+        const modal = document.getElementById('parent-task-select-modal');
+        const list = document.getElementById('parent-task-select-list');
+        
+        modal.classList.remove('hidden');
+        list.innerHTML = '<div class="empty-state">Loading...</div>';
+        
+        try {
+          const response = await fetch(`/api/task/project/${createTaskProjectId}`, { credentials: 'include' });
+          const tasks = await response.json();
+          
+          // Filter out tasks that are already selected as parents
+          const availableTasks = tasks.filter(t => 
+            !selectedParentTasks.some(st => st.id === t.id)
+          );
+          
+          if (!availableTasks || availableTasks.length === 0) {
+            list.innerHTML = '<div class="empty-state">No available tasks in this project</div>';
+            return;
+          }
+          
+          list.innerHTML = '';
+          availableTasks.forEach(task => {
+            const item = document.createElement('div');
+            item.className = 'parent-task-select-item';
+            
+            const title = document.createElement('span');
+            title.className = 'parent-task-select-title';
+            title.textContent = task.title;
+            
+            const status = document.createElement('span');
+            status.className = 'parent-task-select-status';
+            status.textContent = task.status;
+            status.dataset.status = task.status;
+            
+            item.appendChild(title);
+            item.appendChild(status);
+            
+            item.addEventListener('click', () => {
+              selectedParentTasks.push(task);
+              renderSelectedParentTasks();
+              modal.classList.add('hidden');
+            });
+            
+            list.appendChild(item);
+          });
+        } catch (e) {
+          console.error('Error loading tasks:', e);
+          list.innerHTML = '<div class="empty-state">Error loading tasks</div>';
+        }
+      };
+      
+      const closeParentTaskSelect = () => {
+        document.getElementById('parent-task-select-modal').classList.add('hidden');
+      };
+      
+      document.getElementById('add-parent-task-btn')?.addEventListener('click', openParentTaskSelect);
+      document.getElementById('close-parent-task-select')?.addEventListener('click', closeParentTaskSelect);
+      document.getElementById('parent-task-select-modal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'parent-task-select-modal') closeParentTaskSelect();
+      });
+
+      // Tags functions
+      const renderSelectedTags = () => {
+        const list = document.getElementById('tags-list');
+        list.innerHTML = '';
+        
+        selectedTags.forEach(tag => {
+          const tagEl = document.createElement('div');
+          tagEl.className = 'task-tag';
+          
+          const tagName = document.createElement('span');
+          tagName.className = 'task-tag-name';
+          tagName.textContent = tag;
+          
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'task-tag-remove';
+          removeBtn.textContent = '×';
+          removeBtn.type = 'button';
+          removeBtn.addEventListener('click', () => {
+            selectedTags = selectedTags.filter(t => t !== tag);
+            renderSelectedTags();
+          });
+          
+          tagEl.appendChild(tagName);
+          tagEl.appendChild(removeBtn);
+          list.appendChild(tagEl);
+        });
+      };
+
+      const openTagSelect = async () => {
+        const modal = document.getElementById('tag-select-modal');
+        const existingContainer = document.getElementById('tag-select-existing');
+        
+        modal.classList.remove('hidden');
+        existingContainer.innerHTML = '<div class="empty-state">Loading...</div>';
+        
+        try {
+          // Load existing tags from project
+          const response = await fetch(`/api/task/project/${createTaskProjectId}/tags`, { credentials: 'include' });
+          projectTags = await response.json();
+          
+          // Filter out already selected tags
+          const availableTags = projectTags.filter(t => !selectedTags.includes(t));
+          
+          if (availableTags.length === 0) {
+            existingContainer.innerHTML = '<div class="empty-state">No existing tags in this project</div>';
+          } else {
+            existingContainer.innerHTML = '';
+            availableTags.forEach(tag => {
+              const tagEl = document.createElement('div');
+              tagEl.className = 'tag-select-item';
+              tagEl.textContent = tag;
+              
+              tagEl.addEventListener('click', () => {
+                selectedTags.push(tag);
+                renderSelectedTags();
+                modal.classList.add('hidden');
+              });
+              
+              existingContainer.appendChild(tagEl);
+            });
+          }
+        } catch (e) {
+          console.error('Error loading tags:', e);
+          existingContainer.innerHTML = '<div class="empty-state">Error loading tags</div>';
+        }
+        
+        document.getElementById('new-tag-input').value = '';
+      };
+      
+      const closeTagSelect = () => {
+        document.getElementById('tag-select-modal').classList.add('hidden');
+      };
+      
+      const createNewTag = () => {
+        const input = document.getElementById('new-tag-input');
+        const newTag = input.value.trim();
+        
+        if (newTag && !selectedTags.includes(newTag)) {
+          selectedTags.push(newTag);
+          renderSelectedTags();
+        }
+        
+        closeTagSelect();
+      };
+      
+      document.getElementById('add-tag-btn')?.addEventListener('click', openTagSelect);
+      document.getElementById('close-tag-select')?.addEventListener('click', closeTagSelect);
+      document.getElementById('create-tag-btn')?.addEventListener('click', createNewTag);
+      document.getElementById('new-tag-input')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') createNewTag();
+      });
+      document.getElementById('tag-select-modal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'tag-select-modal') closeTagSelect();
+      });
+
+      const showResultModal = (status, message) => {
+        document.getElementById('result-status').textContent = status;
+        document.getElementById('result-message').textContent = message;
+        document.getElementById('result-modal').classList.add('visible');
+        setTimeout(() => {
+          document.getElementById('result-modal').classList.remove('visible');
+        }, 2000);
+      };
+
+      createTaskButton?.addEventListener('click', openSelectProjectModal);
+      selectProjectModalClose?.addEventListener('click', closeSelectProjectModal);
+      createTaskModalClose?.addEventListener('click', closeCreateTaskModal);
+      createTaskCancel?.addEventListener('click', closeCreateTaskModal);
+      
+      selectProjectModal?.addEventListener('click', (e) => {
+        if (e.target === selectProjectModal) closeSelectProjectModal();
+      });
+      
+      createTaskModal?.addEventListener('click', (e) => {
+        if (e.target === createTaskModal) closeCreateTaskModal();
+      });
+
+      document.getElementById('result-modal-close')?.addEventListener('click', () => {
+        document.getElementById('result-modal').classList.remove('visible');
+      });
+      document.getElementById('result-ok')?.addEventListener('click', () => {
+        document.getElementById('result-modal').classList.remove('visible');
+      });
+
+      createTaskForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        
+        const title = taskTitleInput.value.trim();
+        const description = taskDescriptionInput.value.trim();
+        const status = taskStatusInput.value;
+        const priority = taskPriorityInput.value;
+        const assigneeId = taskAssigneeInput.value;
+        const dueDate = selectedDueDate ? selectedDueDate.toISOString() : undefined;
+        const parentTaskIds = selectedParentTasks.length > 0 ? selectedParentTasks.map(t => t.id) : undefined;
+        const tags = selectedTags.length > 0 ? selectedTags : undefined;
+        
+        if (!title || !assigneeId) {
+          alert('Title and Assignee are required');
+          return;
+        }
+        
+        const payload = {
+          title,
+          description,
+          status,
+          priority,
+          assigneeId,
+        };
+        if (dueDate) {
+          payload.dueDate = dueDate;
+        }
+        if (parentTaskIds && parentTaskIds.length > 0) {
+          payload.parentTaskIds = parentTaskIds;
+        }
+        if (tags && tags.length > 0) {
+          payload.tags = tags;
+        }
+        
+        try {
+          const response = await fetch(`/api/task/${createTaskProjectId}/createTask`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          });
+          
+          if (response.status === 401) {
+            window.location.href = '/login.html';
+            return;
+          }
+          
+          if (!response.ok) {
+            alert('Error creating task');
+            return;
+          }
+          
+          closeCreateTaskModal();
+          showResultModal('ok', 'Task created successfully');
+          loadMyTasks();
+        } catch (error) {
+          console.error('Create task error:', error);
+          alert('Network error');
+        }
       });
     </script>
   </body>

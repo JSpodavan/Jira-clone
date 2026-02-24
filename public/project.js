@@ -65,6 +65,7 @@
   const taskStatusInput = document.getElementById('task-status-input');
   const taskPriorityInput = document.getElementById('task-priority-input');
   const taskAssigneeInput = document.getElementById('task-assignee-input');
+  const taskDueDateInput = document.getElementById('task-due-date-input');
 
   const editTaskModal = document.getElementById('edit-task-modal');
   const editTaskClose = document.getElementById('edit-task-close');
@@ -83,6 +84,24 @@
   const newRoleSelect = document.getElementById('new-role-select');
 
   let activeMember = null;
+
+  // Format date function
+  const formatDate = (date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+  };
+
+  // Edit task calendar state
+  let editCalendarDate = new Date();
+  let editSelectedDueDate = null;
+  
+  // Parent tasks and tags for create task
+  let selectedParentTasks = [];
+  let selectedTags = [];
+  let editSelectedTags = [];
+  let projectTags = [];
 
   const params = new URLSearchParams(window.location.search);
   const projectId = params.get('id');
@@ -110,12 +129,231 @@
   };
 
   let currentUserRole = null;
+  let currentUserId = null;
   let activeTask = null;
   let isEditMode = false;
   let projectMembers = [];
   let allMembers = [];
   let currentPage = 1;
   const membersPerPage = 50;
+
+  // Calendar state for create task
+  let calendarDate = new Date();
+  let selectedDueDate = null;
+  
+  // Calendar render functions for create task
+  const renderCalendar = () => {
+    const container = document.getElementById('calendar-days');
+    if (!container) return;
+    
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+    
+    document.getElementById('calendar-month-year').textContent = 
+      calendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
+    
+    container.innerHTML = '';
+    
+    for (let i = 0; i < firstDay; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'calendar-day empty';
+      container.appendChild(empty);
+    }
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dayEl = document.createElement('div');
+      dayEl.className = 'calendar-day';
+      dayEl.textContent = day;
+      
+      const currentDate = new Date(year, month, day);
+      const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
+      const isSelected = selectedDueDate && selectedDueDate.getDate() === day && 
+                         selectedDueDate.getMonth() === month && selectedDueDate.getFullYear() === year;
+      
+      if (isToday) dayEl.classList.add('today');
+      if (isSelected) dayEl.classList.add('selected');
+      
+      dayEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectedDueDate = new Date(year, month, day);
+        document.getElementById('task-due-date-input').value = formatDate(selectedDueDate);
+        document.getElementById('clear-due-date').classList.remove('hidden');
+        document.getElementById('calendar-dropdown').classList.add('hidden');
+      });
+      
+      container.appendChild(dayEl);
+    }
+  };
+
+  const toggleCalendar = () => {
+    const dropdown = document.getElementById('calendar-dropdown');
+    dropdown.classList.toggle('hidden');
+    
+    if (!dropdown.classList.contains('hidden')) {
+      const container = document.querySelector('#create-task-modal .date-picker-container');
+      const calendarHeight = 320;
+      
+      if (container) {
+        const containerRect = container.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - containerRect.bottom;
+        const spaceAbove = containerRect.top;
+        
+        if (spaceBelow < calendarHeight && spaceAbove > spaceBelow) {
+          dropdown.classList.remove('open-down');
+          dropdown.classList.add('open-up');
+        } else {
+          dropdown.classList.remove('open-up');
+          dropdown.classList.add('open-down');
+        }
+      }
+      
+      renderCalendar();
+    }
+  };
+
+  // Calendar event listeners
+  document.getElementById('due-date-toggle')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleCalendar();
+  });
+
+  document.getElementById('calendar-prev')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    calendarDate.setMonth(calendarDate.getMonth() - 1);
+    renderCalendar();
+  });
+
+  document.getElementById('calendar-next')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    calendarDate.setMonth(calendarDate.getMonth() + 1);
+    renderCalendar();
+  });
+
+  document.getElementById('clear-due-date')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    selectedDueDate = null;
+    document.getElementById('task-due-date-input').value = '';
+    document.getElementById('clear-due-date').classList.add('hidden');
+  });
+
+  // Close calendar when clicking outside
+  document.addEventListener('click', (e) => {
+    const container = document.querySelector('#create-task-modal .date-picker-container');
+    const dropdown = document.getElementById('calendar-dropdown');
+    if (container && !container.contains(e.target) && !dropdown.contains(e.target) && !dropdown.classList.contains('hidden')) {
+      dropdown.classList.add('hidden');
+    }
+  });
+
+  // Edit task calendar functions
+  const renderEditCalendar = () => {
+    const container = document.getElementById('edit-calendar-days');
+    if (!container) return;
+    
+    const year = editCalendarDate.getFullYear();
+    const month = editCalendarDate.getMonth();
+    
+    document.getElementById('edit-calendar-month-year').textContent = 
+      editCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
+    
+    container.innerHTML = '';
+    
+    for (let i = 0; i < firstDay; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'calendar-day empty';
+      container.appendChild(empty);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dayEl = document.createElement('div');
+      dayEl.className = 'calendar-day';
+      dayEl.textContent = day;
+      
+      const currentDate = new Date(year, month, day);
+      const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
+      const isSelected = editSelectedDueDate && editSelectedDueDate.getDate() === day && 
+                         editSelectedDueDate.getMonth() === month && editSelectedDueDate.getFullYear() === year;
+      
+      if (isToday) dayEl.classList.add('today');
+      if (isSelected) dayEl.classList.add('selected');
+      
+      dayEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        editSelectedDueDate = new Date(year, month, day);
+        document.getElementById('edit-task-due-date').value = formatDate(editSelectedDueDate);
+        document.getElementById('edit-clear-due-date').classList.remove('hidden');
+        document.getElementById('edit-calendar-dropdown').classList.add('hidden');
+      });
+      
+      container.appendChild(dayEl);
+    }
+  };
+
+  const toggleEditCalendar = () => {
+    const dropdown = document.getElementById('edit-calendar-dropdown');
+    dropdown.classList.toggle('hidden');
+    
+    if (!dropdown.classList.contains('hidden')) {
+      renderEditCalendar();
+    }
+  };
+
+  document.getElementById('edit-due-date-toggle')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleEditCalendar();
+  });
+
+  document.getElementById('edit-calendar-prev')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    editCalendarDate.setMonth(editCalendarDate.getMonth() - 1);
+    renderEditCalendar();
+  });
+
+  document.getElementById('edit-calendar-next')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    editCalendarDate.setMonth(editCalendarDate.getMonth() + 1);
+    renderEditCalendar();
+  });
+
+  document.getElementById('edit-clear-due-date')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    editSelectedDueDate = null;
+    document.getElementById('edit-task-due-date').value = '';
+    document.getElementById('edit-clear-due-date').classList.add('hidden');
+  });
+
+  // Close edit calendar when clicking outside
+  document.addEventListener('click', (e) => {
+    const container = document.querySelector('#edit-task-modal .date-picker-container');
+    const dropdown = document.getElementById('edit-calendar-dropdown');
+    if (container && !container.contains(e.target) && !dropdown.contains(e.target) && !dropdown.classList.contains('hidden')) {
+      dropdown.classList.add('hidden');
+    }
+  });
+
+  const getCurrentUserId = async () => {
+    try {
+      const response = await fetch('/auth/me', { credentials: 'include' });
+      if (response.status === 401) {
+        console.log('Not authenticated');
+        return null;
+      }
+      const user = await response.json();
+      console.log('Current user:', user);
+      return user.id || user.sub || null;
+    } catch (e) {
+      console.error('Error getting current user:', e);
+      return null;
+    }
+  };
 
   const applyRoleVisibility = () => {
     const isMemberOnly = currentUserRole === 'MEMBER';
@@ -338,6 +576,7 @@
 
   const renderTasks = (tasks) => {
     tasksContainer.innerHTML = '';
+    
     if (!tasks || tasks.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'empty-state';
@@ -351,15 +590,43 @@
       card.className = 'task-card';
       card.addEventListener('click', () => openTaskModal(task));
 
+      const titleWrapper = document.createElement('div');
+      titleWrapper.className = 'task-title-wrapper';
+      
       const title = document.createElement('div');
       title.className = 'task-title';
       title.textContent = task.title ?? 'Untitled';
 
+      // Добавляем желтый восклицательный знак, если задача назначена на текущего пользователя
+      const assigneeId = task.assignee?.id;
+      const isMyTask = assigneeId && currentUserId && String(assigneeId) === String(currentUserId);
+      
+      if (isMyTask) {
+        const badge = document.createElement('span');
+        badge.className = 'my-task-badge';
+        badge.title = 'Assigned to you';
+        badge.textContent = '!';
+        titleWrapper.appendChild(title);
+        titleWrapper.appendChild(badge);
+      } else {
+        titleWrapper.appendChild(title);
+      }
+
       const meta = document.createElement('div');
       meta.className = 'task-meta';
-      meta.textContent = `${task.status ?? '—'} · ${task.priority ?? '—'}`;
+      let metaText = `${task.status ?? '—'} · ${task.priority ?? '—'}`;
+      if (task.dueDate) {
+        const dueDate = new Date(task.dueDate);
+        const formattedDue = formatDate(dueDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const isOverdue = dueDate < today && task.status !== 'DONE';
+        metaText += ` · Due: ${formattedDue}`;
+        meta.style.color = isOverdue ? '#dc3545' : '';
+      }
+      meta.textContent = metaText;
 
-      card.appendChild(title);
+      card.appendChild(titleWrapper);
       card.appendChild(meta);
       tasksContainer.appendChild(card);
     });
@@ -406,6 +673,19 @@
         ? `${reporter.name} ${reporter.surname}`
         : reporter.email || '—';
     
+    // Due date display
+    const dueDateView = document.getElementById('task-due-date-view');
+    if (task.dueDate) {
+      const dueDate = new Date(task.dueDate);
+      dueDateView.textContent = formatDate(dueDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      dueDateView.style.color = dueDate < today && task.status !== 'DONE' ? '#dc3545' : '';
+    } else {
+      dueDateView.textContent = '—';
+      dueDateView.style.color = '';
+    }
+    
     taskDescriptionEdit.value = task.description || '';
     taskStatusEdit.value = task.status || 'TODO';
     taskPriorityEdit.value = task.priority || 'MEDIUM';
@@ -430,6 +710,71 @@
     taskSave.classList.add('hidden');
     taskCancelEdit.classList.add('hidden');
     
+    // Load parent tasks
+    const parentTasksContainer = document.getElementById('task-modal-parent-tasks');
+    if (task.parentTaskIds && task.parentTaskIds.length > 0) {
+      parentTasksContainer.parentElement.style.display = 'flex';
+      parentTasksContainer.innerHTML = '<div class="empty-state">Loading...</div>';
+      
+      try {
+        const response = await fetch(`/api/task/project/${projectId}`, { credentials: 'include' });
+        const allTasks = await response.json();
+        
+        const parentTasks = allTasks.filter(t => task.parentTaskIds.includes(t.id));
+        
+        parentTasksContainer.innerHTML = '';
+        parentTasks.forEach(parentTask => {
+          const tag = document.createElement('div');
+          tag.className = 'parent-task-tag clickable';
+          
+          const title = document.createElement('span');
+          title.className = 'parent-task-tag-title';
+          title.textContent = parentTask.title;
+          
+          const status = document.createElement('span');
+          status.className = 'parent-task-tag-status';
+          status.textContent = parentTask.status;
+          status.dataset.status = parentTask.status;
+          
+          tag.appendChild(title);
+          tag.appendChild(status);
+          
+          tag.addEventListener('click', () => {
+            closeTaskModal();
+            openTaskModal(parentTask);
+          });
+          
+          parentTasksContainer.appendChild(tag);
+        });
+      } catch (e) {
+        console.error('Error loading parent tasks:', e);
+        parentTasksContainer.innerHTML = '<div class="empty-state">Error loading</div>';
+      }
+    } else {
+      parentTasksContainer.parentElement.style.display = 'none';
+    }
+    
+    // Load tags
+    const tagsContainer = document.getElementById('task-modal-tags');
+    tagsContainer.innerHTML = ''; // Clear previous tags
+    
+    if (task.tags && task.tags.length > 0) {
+      tagsContainer.parentElement.style.display = 'flex';
+      task.tags.forEach(tag => {
+        const tagEl = document.createElement('div');
+        tagEl.className = 'task-tag';
+        
+        const tagName = document.createElement('span');
+        tagName.className = 'task-tag-name';
+        tagName.textContent = tag;
+        
+        tagEl.appendChild(tagName);
+        tagsContainer.appendChild(tagEl);
+      });
+    } else {
+      tagsContainer.parentElement.style.display = 'none';
+    }
+    
     await loadComments();
     taskModal.classList.add('visible');
   };
@@ -450,6 +795,10 @@
     taskAssigneeView.classList.add('hidden');
     taskAssigneeEdit.classList.remove('hidden');
     
+    // Also hide due date and show edit button - due date editing happens in edit-task-modal
+    const dueDateView = document.getElementById('task-due-date-view');
+    dueDateView.classList.add('hidden');
+    
     taskEdit.classList.add('hidden');
     taskDelete.classList.add('hidden');
     taskClose.classList.add('hidden');
@@ -467,6 +816,10 @@
     taskPriorityEdit.classList.add('hidden');
     taskAssigneeView.classList.remove('hidden');
     taskAssigneeEdit.classList.add('hidden');
+    
+    // Show due date again
+    const dueDateView = document.getElementById('task-due-date-view');
+    dueDateView.classList.remove('hidden');
     
     taskEdit.classList.remove('hidden');
     taskDelete.classList.remove('hidden');
@@ -495,6 +848,20 @@
     }
     if (assigneeId.length > 0) {
       payload.assigneeId = assigneeId;
+    }
+    if (editSelectedDueDate) {
+      payload.dueDate = editSelectedDueDate.toISOString();
+    } else if (document.getElementById('edit-clear-due-date').classList.contains('hidden') === false && !editSelectedDueDate) {
+      // Clear due date if clear button is visible but no date selected
+      payload.dueDate = null;
+    }
+    
+    // Include tags
+    if (editSelectedTags.length > 0) {
+      payload.tags = editSelectedTags;
+    } else if (activeTask.tags && activeTask.tags.length > 0) {
+      // If there were tags before and now empty, clear them
+      payload.tags = [];
     }
     
     try {
@@ -531,6 +898,19 @@
           ? `${assignee.name} ${assignee.surname}`
           : assignee.email || '—';
       
+      // Update due date display
+      const dueDateView = document.getElementById('task-due-date-view');
+      if (updatedTask.dueDate) {
+        const dueDate = new Date(updatedTask.dueDate);
+        dueDateView.textContent = formatDate(dueDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        dueDateView.style.color = dueDate < today && updatedTask.status !== 'DONE' ? '#dc3545' : '';
+      } else {
+        dueDateView.textContent = '—';
+        dueDateView.style.color = '';
+      }
+      
       disableEditMode();
       await loadTasks();
     } catch (error) {
@@ -545,7 +925,23 @@
     taskStatusInput.value = 'TODO';
     taskPriorityInput.value = 'MEDIUM';
     
-    taskAssigneeInput.innerHTML = '<option value="">Select assignee</option>';
+    // Reset due date and calendar position
+    selectedDueDate = null;
+    taskDueDateInput.value = '';
+    document.getElementById('clear-due-date').classList.add('hidden');
+    const dropdown = document.getElementById('calendar-dropdown');
+    dropdown.classList.remove('open-up');
+    dropdown.classList.add('open-down');
+    
+    // Reset parent tasks
+    selectedParentTasks = [];
+    renderSelectedParentTasks();
+    
+    // Reset tags
+    selectedTags = [];
+    renderSelectedTags();
+    
+    taskAssigneeInput.innerHTML = '<option value="">Select team member</option>';
     projectMembers.forEach(member => {
       const user = member.user || {};
       const displayName = user.name && user.surname 
@@ -562,7 +958,293 @@
 
   const closeCreateTaskModal = () => {
     createTaskModal.classList.remove('visible');
+    selectedParentTasks = [];
+    renderSelectedParentTasks();
+    selectedTags = [];
+    renderSelectedTags();
   };
+
+  // Parent task selection functions
+  const renderSelectedParentTasks = () => {
+    const list = document.getElementById('parent-tasks-list');
+    list.innerHTML = '';
+    
+    selectedParentTasks.forEach(task => {
+      const tag = document.createElement('div');
+      tag.className = 'parent-task-tag';
+      
+      const title = document.createElement('span');
+      title.className = 'parent-task-tag-title';
+      title.textContent = task.title;
+      
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'parent-task-tag-remove';
+      removeBtn.textContent = '×';
+      removeBtn.type = 'button';
+      removeBtn.addEventListener('click', () => {
+        selectedParentTasks = selectedParentTasks.filter(t => t.id !== task.id);
+        renderSelectedParentTasks();
+      });
+      
+      tag.appendChild(title);
+      tag.appendChild(removeBtn);
+      list.appendChild(tag);
+    });
+    
+    // Always show the add button
+    const addBtn = document.getElementById('add-parent-task-btn');
+    if (addBtn) {
+      addBtn.style.display = 'inline-flex';
+    }
+  };
+
+  const openParentTaskSelect = async () => {
+    const modal = document.getElementById('parent-task-select-modal');
+    const list = document.getElementById('parent-task-select-list');
+    
+    modal.classList.remove('hidden');
+    list.innerHTML = '<div class="empty-state">Loading...</div>';
+    
+    try {
+      const response = await fetch(`/api/task/project/${projectId}`, { credentials: 'include' });
+      const tasks = await response.json();
+      
+      // Filter out tasks that are already selected as parents
+      const availableTasks = tasks.filter(t => 
+        !selectedParentTasks.some(st => st.id === t.id)
+      );
+      
+      if (!availableTasks || availableTasks.length === 0) {
+        list.innerHTML = '<div class="empty-state">No available tasks in this project</div>';
+        return;
+      }
+      
+      list.innerHTML = '';
+      availableTasks.forEach(task => {
+        const item = document.createElement('div');
+        item.className = 'parent-task-select-item';
+        
+        const title = document.createElement('span');
+        title.className = 'parent-task-select-title';
+        title.textContent = task.title;
+        
+        const status = document.createElement('span');
+        status.className = 'parent-task-select-status';
+        status.textContent = task.status;
+        status.dataset.status = task.status;
+        
+        item.appendChild(title);
+        item.appendChild(status);
+        
+        item.addEventListener('click', () => {
+          selectedParentTasks.push(task);
+          renderSelectedParentTasks();
+          modal.classList.add('hidden');
+        });
+        
+        list.appendChild(item);
+      });
+    } catch (e) {
+      console.error('Error loading tasks:', e);
+      list.innerHTML = '<div class="empty-state">Error loading tasks</div>';
+    }
+  };
+
+  const closeParentTaskSelect = () => {
+    document.getElementById('parent-task-select-modal').classList.add('hidden');
+  };
+
+  document.getElementById('add-parent-task-btn')?.addEventListener('click', openParentTaskSelect);
+  document.getElementById('close-parent-task-select')?.addEventListener('click', closeParentTaskSelect);
+  document.getElementById('parent-task-select-modal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'parent-task-select-modal') closeParentTaskSelect();
+  });
+
+  // Tags functions for create task
+  const renderSelectedTags = () => {
+    const list = document.getElementById('tags-list');
+    list.innerHTML = '';
+    
+    selectedTags.forEach(tag => {
+      const tagEl = document.createElement('div');
+      tagEl.className = 'task-tag';
+      
+      const tagName = document.createElement('span');
+      tagName.className = 'task-tag-name';
+      tagName.textContent = tag;
+      
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'task-tag-remove';
+      removeBtn.textContent = '×';
+      removeBtn.type = 'button';
+      removeBtn.addEventListener('click', () => {
+        selectedTags = selectedTags.filter(t => t !== tag);
+        renderSelectedTags();
+      });
+      
+      tagEl.appendChild(tagName);
+      tagEl.appendChild(removeBtn);
+      list.appendChild(tagEl);
+    });
+  };
+
+  const openTagSelect = async () => {
+    const modal = document.getElementById('tag-select-modal');
+    const existingContainer = document.getElementById('tag-select-existing');
+    
+    modal.classList.remove('hidden');
+    existingContainer.innerHTML = '<div class="empty-state">Loading...</div>';
+    
+    try {
+      const response = await fetch(`/api/task/project/${projectId}/tags`, { credentials: 'include' });
+      projectTags = await response.json();
+      
+      const availableTags = projectTags.filter(t => !selectedTags.includes(t));
+      
+      if (availableTags.length === 0) {
+        existingContainer.innerHTML = '<div class="empty-state">No existing tags in this project</div>';
+      } else {
+        existingContainer.innerHTML = '';
+        availableTags.forEach(tag => {
+          const tagEl = document.createElement('div');
+          tagEl.className = 'tag-select-item';
+          tagEl.textContent = tag;
+          
+          tagEl.addEventListener('click', () => {
+            selectedTags.push(tag);
+            renderSelectedTags();
+            modal.classList.add('hidden');
+          });
+          
+          existingContainer.appendChild(tagEl);
+        });
+      }
+    } catch (e) {
+      console.error('Error loading tags:', e);
+      existingContainer.innerHTML = '<div class="empty-state">Error loading tags</div>';
+    }
+      
+    document.getElementById('new-tag-input').value = '';
+  };
+
+  const closeTagSelect = () => {
+    document.getElementById('tag-select-modal').classList.add('hidden');
+  };
+
+  const createNewTag = () => {
+    const input = document.getElementById('new-tag-input');
+    const newTag = input.value.trim();
+    
+    if (newTag && !selectedTags.includes(newTag)) {
+      selectedTags.push(newTag);
+      renderSelectedTags();
+    }
+    
+    closeTagSelect();
+  };
+
+  document.getElementById('add-tag-btn')?.addEventListener('click', openTagSelect);
+  document.getElementById('close-tag-select')?.addEventListener('click', closeTagSelect);
+  document.getElementById('create-tag-btn')?.addEventListener('click', createNewTag);
+  document.getElementById('new-tag-input')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') createNewTag();
+  });
+  document.getElementById('tag-select-modal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'tag-select-modal') closeTagSelect();
+  });
+
+  // Tags functions for edit task
+  const renderEditSelectedTags = () => {
+    const list = document.getElementById('edit-tags-list');
+    list.innerHTML = '';
+    
+    editSelectedTags.forEach(tag => {
+      const tagEl = document.createElement('div');
+      tagEl.className = 'task-tag';
+      
+      const tagName = document.createElement('span');
+      tagName.className = 'task-tag-name';
+      tagName.textContent = tag;
+      
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'task-tag-remove';
+      removeBtn.textContent = '×';
+      removeBtn.type = 'button';
+      removeBtn.addEventListener('click', () => {
+        editSelectedTags = editSelectedTags.filter(t => t !== tag);
+        renderEditSelectedTags();
+      });
+      
+      tagEl.appendChild(tagName);
+      tagEl.appendChild(removeBtn);
+      list.appendChild(tagEl);
+    });
+  };
+
+  const openEditTagSelect = async () => {
+    const modal = document.getElementById('edit-tag-select-modal');
+    const existingContainer = document.getElementById('edit-tag-select-existing');
+    
+    modal.classList.remove('hidden');
+    existingContainer.innerHTML = '<div class="empty-state">Loading...</div>';
+    
+    try {
+      const response = await fetch(`/api/task/project/${projectId}/tags`, { credentials: 'include' });
+      const tags = await response.json();
+      
+      const availableTags = tags.filter(t => !editSelectedTags.includes(t));
+      
+      if (availableTags.length === 0) {
+        existingContainer.innerHTML = '<div class="empty-state">No existing tags in this project</div>';
+      } else {
+        existingContainer.innerHTML = '';
+        availableTags.forEach(tag => {
+          const tagEl = document.createElement('div');
+          tagEl.className = 'tag-select-item';
+          tagEl.textContent = tag;
+          
+          tagEl.addEventListener('click', () => {
+            editSelectedTags.push(tag);
+            renderEditSelectedTags();
+            modal.classList.add('hidden');
+          });
+          
+          existingContainer.appendChild(tagEl);
+        });
+      }
+    } catch (e) {
+      console.error('Error loading tags:', e);
+      existingContainer.innerHTML = '<div class="empty-state">Error loading tags</div>';
+    }
+    
+    document.getElementById('edit-new-tag-input').value = '';
+  };
+
+  const closeEditTagSelect = () => {
+    document.getElementById('edit-tag-select-modal').classList.add('hidden');
+  };
+
+  const createEditNewTag = () => {
+    const input = document.getElementById('edit-new-tag-input');
+    const newTag = input.value.trim();
+    
+    if (newTag && !editSelectedTags.includes(newTag)) {
+      editSelectedTags.push(newTag);
+      renderEditSelectedTags();
+    }
+    
+    closeEditTagSelect();
+  };
+
+  document.getElementById('edit-add-tag-btn')?.addEventListener('click', openEditTagSelect);
+  document.getElementById('edit-close-tag-select')?.addEventListener('click', closeEditTagSelect);
+  document.getElementById('edit-create-tag-btn')?.addEventListener('click', createEditNewTag);
+  document.getElementById('edit-new-tag-input')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') createEditNewTag();
+  });
+  document.getElementById('edit-tag-select-modal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'edit-tag-select-modal') closeEditTagSelect();
+  });
 
   const openEditTaskModal = () => {
     if (!activeTask) {
@@ -572,6 +1254,22 @@
     editTaskStatus.value = activeTask.status || 'TODO';
     editTaskPriority.value = activeTask.priority || 'MEDIUM';
     editTaskAssignee.value = activeTask.assignee?.id || '';
+    
+    // Load due date
+    if (activeTask.dueDate) {
+      editSelectedDueDate = new Date(activeTask.dueDate);
+      document.getElementById('edit-task-due-date').value = formatDate(editSelectedDueDate);
+      document.getElementById('edit-clear-due-date').classList.remove('hidden');
+    } else {
+      editSelectedDueDate = null;
+      document.getElementById('edit-task-due-date').value = '';
+      document.getElementById('edit-clear-due-date').classList.add('hidden');
+    }
+    
+    // Load tags
+    editSelectedTags = activeTask.tags ? [...activeTask.tags] : [];
+    renderEditSelectedTags();
+    
     editTaskModal.classList.add('visible');
   };
 
@@ -869,23 +1567,38 @@
     const status = taskStatusInput.value;
     const priority = taskPriorityInput.value;
     const assigneeId = taskAssigneeInput.value;
+    const dueDate = selectedDueDate ? selectedDueDate.toISOString() : undefined;
+    const parentTaskIds = selectedParentTasks.length > 0 ? selectedParentTasks.map(t => t.id) : undefined;
+    const tags = selectedTags.length > 0 ? selectedTags : undefined;
+    
     if (!title || !assigneeId) {
       showErrorModal('Title and Assignee are required');
       return;
     }
     try {
+      const payload = {
+        title,
+        description,
+        status,
+        priority,
+        assigneeId,
+      };
+      if (dueDate) {
+        payload.dueDate = dueDate;
+      }
+      if (parentTaskIds && parentTaskIds.length > 0) {
+        payload.parentTaskIds = parentTaskIds;
+      }
+      if (tags && tags.length > 0) {
+        payload.tags = tags;
+      }
+      
       const response = await fetch(`/api/task/${projectId}/createTask`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          title,
-          description,
-          status,
-          priority,
-          assigneeId,
-        }),
+        body: JSON.stringify(payload),
       });
       if (handleUnauthorized(response)) {
         return;
@@ -951,6 +1664,7 @@
   });
 
   const init = async () => {
+    currentUserId = await getCurrentUserId();
     await loadProject();
     await loadMembers();
     await loadTasks();

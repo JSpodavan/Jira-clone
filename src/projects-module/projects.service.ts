@@ -323,4 +323,17 @@ export class ProjectsService {
     return { message: 'Заявка отклонена' };
   }
 
+  async findMyManagedProjects(userId: string) {
+    const memberships = await this.membersRepository.find({
+      where: { user: { id: userId } },
+      relations: ['project', 'project.owner'],
+    });
+    
+    const managedProjects = memberships
+      .filter(m => m.role === ProjectRole.Owner || m.role === ProjectRole.Manager)
+      .map(m => m.project);
+    
+    return managedProjects;
+  }
+
 }

@@ -11,6 +11,11 @@ export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
 
+  @Get('my-tasks')
+  async getMyTasks(@CurrentUser() userId: string){
+    return this.taskService.getMyTasks(userId)
+  }
+
   @Get(':taskId')
   async getTask(@Param('taskId') taskId: string){
     return this.taskService.getTask(taskId)
@@ -19,6 +24,11 @@ export class TaskController {
   @Get('project/:projectId')
   async getProjectTasks(@Param('projectId') projectId: string){
     return this.taskService.getProjectTasks(projectId)
+  }
+
+  @Get('project/:projectId/tags')
+  async getProjectTags(@Param('projectId') projectId: string){
+    return this.taskService.getProjectTags(projectId)
   }
 
   @Post(':taskId')

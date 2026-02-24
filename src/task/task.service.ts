@@ -40,6 +40,30 @@ export class TaskService {
     });
   }
 
+  async getProjectTags(projectId: string){
+    const tasks = await this.taskRepository.find({
+      where: { project: { id: projectId } },
+      select: ['tags'],
+    });
+    
+    const allTags = new Set<string>();
+    tasks.forEach(task => {
+      if (task.tags && task.tags.length > 0) {
+        task.tags.forEach(tag => allTags.add(tag));
+      }
+    });
+    
+    return Array.from(allTags).sort();
+  }
+
+  async getMyTasks(userId: string){
+    return this.taskRepository.find({
+      where: { assignee: { id: userId } },
+      relations: ['assignee', 'reporter', 'project'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async updateTask(taskId: string, updateTaskDto: updateTaskDto){
     const task = await this.taskRepository.findOne({where: {id : taskId}});
     if (!task) {
@@ -64,6 +88,15 @@ export class TaskService {
           }
           task.assignee = user;
         }
+    }
+    if (updateTaskDto.dueDate !== undefined){
+        task.dueDate = updateTaskDto.dueDate ? new Date(updateTaskDto.dueDate) : null;
+    }
+    if (updateTaskDto.parentTaskIds !== undefined){
+        task.parentTaskIds = updateTaskDto.parentTaskIds || null;
+    }
+    if (updateTaskDto.tags !== undefined){
+        task.tags = updateTaskDto.tags || null;
     }
     return this.taskRepository.save(task);
   }
@@ -91,6 +124,9 @@ export class TaskService {
         description: createTaskDto.description,
         status: createTaskDto.status,
         priority: createTaskDto.priority,
+        dueDate: createTaskDto.dueDate ? new Date(createTaskDto.dueDate) : null,
+        parentTaskIds: createTaskDto.parentTaskIds || null,
+        tags: createTaskDto.tags || null,
         project: project,
         assignee: assigneeUser,
         reporter: reporter

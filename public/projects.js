@@ -367,6 +367,195 @@ const initProjectsPage = () => {
   resultClose.addEventListener('click', closeResultModal);
   resultOk.addEventListener('click', closeResultModal);
 
+  // Create Task functionality
+  const createTaskButton = document.getElementById('create-task-button');
+  const selectProjectModal = document.getElementById('select-project-modal');
+  const selectProjectModalClose = document.getElementById('select-project-modal-close');
+  const taskProjectsList = document.getElementById('task-projects-list');
+  const createTaskModal = document.getElementById('create-task-modal');
+  const createTaskModalClose = document.getElementById('create-task-modal-close');
+  const createTaskCancel = document.getElementById('create-task-cancel');
+  const createTaskForm = document.getElementById('create-task-form');
+  const taskTitleInput = document.getElementById('task-title');
+  const taskDescriptionInput = document.getElementById('task-description');
+  const taskStatusInput = document.getElementById('task-status');
+  const taskPriorityInput = document.getElementById('task-priority');
+  const taskAssigneeInput = document.getElementById('task-assignee');
+
+  let selectedTaskProjectId = null;
+
+  const openSelectProjectModal = async () => {
+    selectProjectModal.classList.add('visible');
+    taskProjectsList.innerHTML = '<div class="empty-state">Loading...</div>';
+    
+    try {
+      const response = await fetch('/api/projects/my-managed', { credentials: 'include' });
+      if (response.status === 401) {
+        window.location.href = '/reg.html';
+        return;
+      }
+      const projects = await response.json();
+      
+      if (!projects || projects.length === 0) {
+        taskProjectsList.innerHTML = '<div class="empty-state">You have no projects where you are Manager or Owner</div>';
+        return;
+      }
+
+      // Colors for project badges
+      const colors = [
+        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      ];
+
+      taskProjectsList.innerHTML = '';
+      projects.forEach((project, index) => {
+        const card = document.createElement('div');
+        card.className = 'project-select-card';
+        card.dataset.projectId = project.id;
+        
+        const badge = document.createElement('div');
+        badge.className = 'project-badge-small';
+        const initials = (project.name || 'U').substring(0, 2).toUpperCase();
+        badge.textContent = initials;
+        badge.style.background = colors[index % colors.length];
+        
+        const title = document.createElement('div');
+        title.className = 'project-select-title';
+        title.textContent = project.name;
+        
+        const description = document.createElement('div');
+        description.className = 'project-select-description';
+        description.textContent = project.description || 'No description';
+        
+        card.appendChild(badge);
+        card.appendChild(title);
+        card.appendChild(description);
+        
+        card.addEventListener('click', () => {
+          document.querySelectorAll('#task-projects-list .project-select-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          selectedTaskProjectId = project.id;
+          
+          // Open create task modal after short delay
+          setTimeout(() => {
+            closeSelectProjectModal();
+            openCreateTaskModal(project);
+          }, 200);
+        });
+        
+        taskProjectsList.appendChild(card);
+      });
+    } catch (error) {
+      console.error('Error loading projects:', error);
+      taskProjectsList.innerHTML = '<div class="empty-state">Error loading projects</div>';
+    }
+  };
+
+  const closeSelectProjectModal = () => {
+    selectProjectModal.classList.remove('visible');
+    selectedTaskProjectId = null;
+  };
+
+  const openCreateTaskModal = async (project) => {
+    selectedTaskProjectId = project.id;
+    taskTitleInput.value = '';
+    taskDescriptionInput.value = '';
+    taskStatusInput.value = 'TODO';
+    taskPriorityInput.value = 'MEDIUM';
+    
+    // Load members for assignee dropdown
+    taskAssigneeInput.innerHTML = '<option value="">Select assignee</option>';
+    try {
+      const response = await fetch(`/api/projects/${project.id}/members`, { credentials: 'include' });
+      if (response.ok) {
+        const members = await response.json();
+        members.forEach(member => {
+          const user = member.user || {};
+          const displayName = user.name && user.surname 
+            ? `${user.name} ${user.surname}` 
+            : user.email || 'User';
+          const option = document.createElement('option');
+          option.value = user.id;
+          option.textContent = displayName;
+          taskAssigneeInput.appendChild(option);
+        });
+      }
+    } catch (e) {
+      console.error('Error loading members:', e);
+    }
+    
+    createTaskModal.classList.add('visible');
+  };
+
+  const closeCreateTaskModal = () => {
+    createTaskModal.classList.remove('visible');
+    selectedTaskProjectId = null;
+  };
+
+  createTaskButton?.addEventListener('click', openSelectProjectModal);
+  selectProjectModalClose?.addEventListener('click', closeSelectProjectModal);
+  createTaskModalClose?.addEventListener('click', closeCreateTaskModal);
+  createTaskCancel?.addEventListener('click', closeCreateTaskModal);
+  
+  selectProjectModal?.addEventListener('click', (e) => {
+    if (e.target === selectProjectModal) closeSelectProjectModal();
+  });
+  
+  createTaskModal?.addEventListener('click', (e) => {
+    if (e.target === createTaskModal) closeCreateTaskModal();
+  });
+
+  createTaskForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    
+    const title = taskTitleInput.value.trim();
+    const description = taskDescriptionInput.value.trim();
+    const status = taskStatusInput.value;
+    const priority = taskPriorityInput.value;
+    const assigneeId = taskAssigneeInput.value;
+    
+    if (!title || !assigneeId) {
+      showErrorModal('Title and Assignee are required');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/task/${selectedTaskProjectId}/createTask`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title,
+          description,
+          status,
+          priority,
+          assigneeId,
+        }),
+      });
+      
+      if (response.status === 401) {
+        window.location.href = '/reg.html';
+        return;
+      }
+      
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        showErrorModal(data?.message ?? 'Error creating task');
+        return;
+      }
+      
+      closeCreateTaskModal();
+      showResultModal('ok', 'Task created successfully');
+    } catch (error) {
+      console.error('Create task error:', error);
+      showErrorModal('Network error');
+    }
+  });
+
   loadProjects();
 };
 

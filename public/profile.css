@@ -40,10 +40,22 @@ body {
 
 .nav-button {
   border: none;
-  background: transparent;
-  color: #384562;
+  background: #e9f0ff;
+  color: #0a4bcc;
   font-weight: 600;
   cursor: pointer;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.nav-button:hover {
+  background: #d0e0ff;
+  transform: translateX(-2px);
+}
+
+.nav-button:active {
+  transform: translateX(0);
 }
 
 .avatar {
@@ -299,15 +311,26 @@ body {
 .ghost {
   border: none;
   border-radius: 10px;
-  padding: 10px 16px;
+  padding: 10px 18px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .primary {
-  background: #0a4bcc;
+  background: linear-gradient(135deg, #0a4bcc 0%, #0841a8 100%);
   color: #ffffff;
+  box-shadow: 0 2px 8px rgba(10, 75, 204, 0.3);
+}
+
+.primary:hover {
+  background: linear-gradient(135deg, #0d5ce6 0%, #0a4bcc 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(10, 75, 204, 0.4);
+}
+
+.primary:active {
+  transform: translateY(0);
 }
 
 .ghost {
@@ -316,10 +339,14 @@ body {
   color: #2c3a57;
 }
 
-.primary:hover,
 .ghost:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 24px rgba(31, 42, 68, 0.15);
+  background: #e9f0ff;
+  border-color: #0a4bcc;
+  color: #0a4bcc;
+}
+
+.ghost:active {
+  background: #d0e0ff;
 }
 
 .modal {
@@ -360,6 +387,14 @@ body {
   font-size: 20px;
   cursor: pointer;
   color: #5d6b87;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+  background: #e9f0ff;
+  color: #0a4bcc;
 }
 
 .modal-footer {
