@@ -1,1 +1,0 @@
-Always use russian language
