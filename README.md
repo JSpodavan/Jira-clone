@@ -52,13 +52,11 @@ cd jira-clone
 npm install
 ```
 
-3. Настройте переменные окружения (создайте файл `.env`):
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/jira_clone
-JWT_SECRET=your-secret-key
-NODE_ENV=development
-PORT=3000
+3. Настройте переменные окружения:
+```bash
+cp .env.example .env
 ```
+Откройте `.env` и заполните свои значения (для Supabase см. раздел **Database → Connection details** в панели управления).
 
 4. Запустите миграции базы данных:
 ```bash
