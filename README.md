@@ -43,7 +43,7 @@ Jira-clone позволяет командам эффективно планир
 
 1. Клонируйте репозиторий:
 ```bash
-git clone [<repository-url>](https://github.com/JSpodavan/Jira-clone.git)
+git clone https://github.com/JSpodavan/Jira-clone.git
 cd jira-clone
 ```
 
