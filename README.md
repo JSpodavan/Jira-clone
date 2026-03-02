@@ -56,7 +56,7 @@ npm install
 ```bash
 cp .env.example .env
 ```
-Откройте `.env` и заполните свои значения (для Supabase см. раздел **Database → Connection details** в панели управления).
+Откройте `.env` и заполните свои значения
 
 4. Запустите приложение:
 ```bash
