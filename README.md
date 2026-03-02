@@ -58,17 +58,12 @@ cp .env.example .env
 ```
 Откройте `.env` и заполните свои значения (для Supabase см. раздел **Database → Connection details** в панели управления).
 
-4. Запустите миграции базы данных:
-```bash
-npm run migration:run
-```
-
-5. Запустите приложение:
+4. Запустите приложение:
 ```bash
 npm run start:dev
 ```
 
-6. Откройте в браузере: `http://localhost:3000/index.html`
+5. Откройте в браузере: `http://localhost:3000/index.html`
 
 ## Структура проекта
 
